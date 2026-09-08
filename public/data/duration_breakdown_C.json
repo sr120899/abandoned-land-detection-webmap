@@ -1,0 +1,20 @@
+[
+  {
+    "duration_bucket": "Short (<3yr)",
+    "pixel_count": 346705,
+    "area_rai": 195021.56,
+    "pct_of_abandoned_area": 79.71
+  },
+  {
+    "duration_bucket": "Medium (3-5yr)",
+    "pixel_count": 1584,
+    "area_rai": 891.0,
+    "pct_of_abandoned_area": 0.36
+  },
+  {
+    "duration_bucket": "Long (>=5yr)",
+    "pixel_count": 86689,
+    "area_rai": 48762.56,
+    "pct_of_abandoned_area": 19.93
+  }
+]

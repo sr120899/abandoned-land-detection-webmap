@@ -1,0 +1,51 @@
+:root {
+  color-scheme: dark;
+  --bg: #0b1220;
+  --bg-panel: #111a2e;
+  --bg-card: #16213b;
+  --border: #24314f;
+  --text: #e7ecf7;
+  --text-dim: #93a1c2;
+  --accent: #38bdf8;
+  --accent-2: #22d3ee;
+  --good: #34d399;
+  --bad: #f87171;
+  --warn: #fbbf24;
+  font-family: 'Segoe UI', 'Sarabun', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  min-height: 100vh;
+}
+
+a {
+  color: var(--accent);
+}
+
+h1, h2, h3, h4 {
+  margin: 0 0 8px 0;
+  font-weight: 700;
+}
+
+.maplibregl-popup-content {
+  background: var(--bg-card);
+  color: var(--text);
+  border-radius: 8px;
+  font-family: inherit;
+}
+.maplibregl-popup-tip {
+  border-top-color: var(--bg-card) !important;
+  border-bottom-color: var(--bg-card) !important;
+}

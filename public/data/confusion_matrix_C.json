@@ -1,0 +1,603 @@
+{
+  "summary": {
+    "n_AC0_used": 20,
+    "n_AC1_used": 93,
+    "TP": 59,
+    "FP": 0,
+    "TN": 20,
+    "FN": 34,
+    "precision": 1.0,
+    "recall": 0.6344,
+    "false_positive_rate": 0.0,
+    "overall_accuracy": 0.6991
+  },
+  "ac0_details": [
+    {
+      "no": "C4",
+      "type": "ปาล์ม",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C37",
+      "type": "solar cell",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C62",
+      "type": "ไม้ยืนต้น",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C65",
+      "type": "solar cell",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C84",
+      "type": "สิ่งปลูกสร้าง, ที่อยู่อาศัย",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C89",
+      "type": "เกษตรกรรม",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "",
+      "type": "มะพร้าว",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "",
+      "type": "ปาล์ม",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "",
+      "type": "มันสำปะหลัง",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "",
+      "type": "มะพร้าว",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "",
+      "type": "มะพร้าว",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "",
+      "type": "ไม้ยืนต้น",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "",
+      "type": "solar cell",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "",
+      "type": "solar cell",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "",
+      "type": "ไม้ยืนต้น",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "",
+      "type": "ยางพารา",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "",
+      "type": "ไม้ยืนต้น",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "",
+      "type": "ไม้ยืนต้น",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "",
+      "type": "อ้อย",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "",
+      "type": "ไม้ยืนต้น",
+      "majority_raster_val": 0,
+      "predicted_abandoned": false
+    }
+  ],
+  "ac1_details": [
+    {
+      "no": "C1",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C2",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C3",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C5",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C6",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C7",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C8",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C9",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C10",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C11",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C12",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C13",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C14",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C15",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C16",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C17",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C18",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C19",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C20",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C21",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C22",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C23",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C24",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C25",
+      "raster_val": 1,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C26",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C27",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C28",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C29",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C30",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C31",
+      "raster_val": 1,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C32",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C33",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C34",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C35",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C36",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C38",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C39",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C40",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C41",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C42",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C43",
+      "raster_val": 1,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C44",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C45",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C46",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C47",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C48",
+      "raster_val": 1,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C49",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C50",
+      "raster_val": 1,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C51",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C52",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C53",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C54",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C55",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C56",
+      "raster_val": 1,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C57",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C58",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C59",
+      "raster_val": 1,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C61",
+      "raster_val": 1,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C63",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C64",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C66",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C67",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C68",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C69",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C70",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C71",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C72",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C73",
+      "raster_val": 1,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C74",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C75",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C76",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C77",
+      "raster_val": 1,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C78",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C79",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C80",
+      "raster_val": 1,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C81",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C82",
+      "raster_val": 1,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C83",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C85",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C86",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C87",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C88",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C90",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C91",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C92",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C93",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C94",
+      "raster_val": 2,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C95",
+      "raster_val": 1,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C96",
+      "raster_val": 1,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C97",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C98",
+      "raster_val": 1,
+      "predicted_abandoned": true
+    },
+    {
+      "no": "C99",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    },
+    {
+      "no": "C100",
+      "raster_val": 0,
+      "predicted_abandoned": false
+    }
+  ]
+}

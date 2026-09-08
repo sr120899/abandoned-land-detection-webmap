@@ -1,0 +1,90 @@
+{
+  "amphoe_pct_aban": {
+    "metric": "pct_aban",
+    "level": "amphoe",
+    "n_features": 928,
+    "min": 0.0,
+    "max": 5.0151,
+    "quantile_breaks_5class": [
+      0.0,
+      0.0073,
+      0.0362,
+      0.0913,
+      0.2322,
+      5.0151
+    ],
+    "class_labels": [
+      "Very Low",
+      "Low",
+      "Medium",
+      "High",
+      "Very High"
+    ]
+  },
+  "amphoe_area_rai_aban": {
+    "metric": "area_rai_aban",
+    "level": "amphoe",
+    "n_features": 928,
+    "min": 0.0,
+    "max": 17040.38,
+    "quantile_breaks_5class": [
+      0.0,
+      21.38,
+      137.81,
+      376.31,
+      948.38,
+      17040.38
+    ],
+    "class_labels": [
+      "Very Low",
+      "Low",
+      "Medium",
+      "High",
+      "Very High"
+    ]
+  },
+  "province_pct_aban": {
+    "metric": "pct_aban",
+    "level": "province",
+    "n_features": 77,
+    "min": 0.0019,
+    "max": 2.2979,
+    "quantile_breaks_5class": [
+      0.0019,
+      0.0429,
+      0.0879,
+      0.1624,
+      0.2963,
+      2.2979
+    ],
+    "class_labels": [
+      "Very Low",
+      "Low",
+      "Medium",
+      "High",
+      "Very High"
+    ]
+  },
+  "province_area_rai_aban": {
+    "metric": "area_rai_aban",
+    "level": "province",
+    "n_features": 77,
+    "min": 71.44,
+    "max": 45319.5,
+    "quantile_breaks_5class": [
+      71.44,
+      1496.81,
+      4377.38,
+      7783.31,
+      11694.38,
+      45319.5
+    ],
+    "class_labels": [
+      "Very Low",
+      "Low",
+      "Medium",
+      "High",
+      "Very High"
+    ]
+  }
+}
