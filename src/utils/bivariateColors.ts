@@ -1,15 +1,11 @@
-// A true two-axis bilinear blend (interpolated in HSV, hue via shortest path)
-// between four corner colors — navy (Low prob / short dur), purple (Low / long),
-// coral (High / short) and yellow (High / long). This reads smoothly across BOTH
-// probability and duration; a flattened 1D rainbow (an earlier scheme) looked
-// fine within each row but jumped backward in hue at every row boundary, since
-// the grid displays probability High->Low top-to-bottom while class_id runs
-// Low->High. Shared with the province_bivariate raster palette
+// Fixed CMYK-derived palette (print-safe), running dark blue (Low prob / short
+// dur) through purple/pink (mid) to orange/yellow (High prob / long dur).
+// Shared with the province_bivariate raster palette
 // (public/data/province_bivariate) — keep in sync if that raster is regenerated.
 export const BIV_COLORS: Record<number, string> = {
-  1: '#140080', 2: '#4f06a3', 3: '#9d0fc7',
-  4: '#be25b7', 5: '#ce2589', 6: '#de244e',
-  7: '#fb626c', 8: '#f88b4f', 9: '#f5cb3c',
+  1: '#1B1464', 2: '#402078', 3: '#6B2C85',
+  4: '#5B257F', 5: '#90358A', 6: '#C65377',
+  7: '#B14478', 8: '#E17955', 9: '#F6D746',
 }
 
 // class_id = probability tier (0/1/2 = Low/Medium/High) * 3 + duration tier (1/2/3 = short/medium/long)

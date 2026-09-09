@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Firebase CLI's local deploy cache — machine-specific, not meant to be shared
+.firebase
+
 # Separate repo, published on its own (github.com/sr120899/ABANDONED_LAND_DETECTION)
 ABANDONED_LAND_DETECTION/
 

@@ -1,0 +1,47 @@
+﻿/* Compact numbered pins retain the exact location without persistent label pills. */
+.case-study-marker { z-index: 8; }
+.case-study-marker-button { position: relative; display: grid; place-items: center; width: 22px; height: 22px; padding: 0; border: 1.5px solid #ffe3e3; border-radius: 50%; background: #f87171; color: #360a0a; box-shadow: 0 0 0 2px #132736, 0 2px 6px #0009; cursor: pointer; font-family: inherit; }
+.case-study-marker-number { font-size: 10px; font-weight: 800; line-height: 1; }
+.case-study-marker-label { position: absolute; left: 50%; bottom: calc(100% + 9px); transform: translateX(-50%); visibility: hidden; opacity: 0; padding: 7px 10px; border: 1px solid #dcb1ca; border-radius: 6px; background: #102330f5; color: #fff; white-space: nowrap; font-size: 12px; font-weight: 600; pointer-events: none; }
+.case-study-marker:hover, .case-study-marker:focus-within { z-index: 15; }
+.case-study-marker-button:hover, .case-study-marker-button:focus-visible { background: #ef4444; }
+.case-study-marker-button:hover .case-study-marker-label,
+.case-study-marker-button:focus-visible .case-study-marker-label { opacity: 1; visibility: visible; }
+.case-study-marker-button:focus-visible { outline: 2px solid #ffc9c9; outline-offset: 3px; }
+/* Dense province/district overviews show totals only; names surface via the native title tooltip. */
+.bubble-marker.composition-marker.composition-compact { padding: 5px; box-shadow: 0 1px 5px #0008; }
+.composition-compact .bubble-value { font-size: 12px; font-weight: 800; line-height: 1; }
+.composition-compact:hover, .composition-compact:focus-visible { z-index: 14; }
+
+/* The pixel count is the headline everywhere; the region letter (when present) stays a
+   smaller supporting tag. Donut ring, hollow center: black text with a light halo so it
+   stays legible over whatever basemap shows through the hole. */
+.explore-shell .bubble-marker.composition-marker .bubble-value,
+.explore-shell .bubble-marker.composition-marker .bubble-value:only-child {
+ font-family: 'Segoe UI', 'Sarabun', system-ui, sans-serif;
+ font-size: var(--bubble-number-size, 18px);
+ font-weight: 800;
+ font-variant-numeric: lining-nums tabular-nums;
+ line-height: 1.05;
+ letter-spacing: -.025em;
+ color: #1a1200;
+ text-shadow: 0 0 4px #fff9e6, 0 0 2px #fff9e6;
+ white-space: nowrap;
+}
+.explore-shell .bubble-marker.composition-marker .bubble-label {
+ font-family: 'Segoe UI', 'Sarabun', system-ui, sans-serif;
+ font-size: var(--bubble-label-size, 10px);
+ font-weight: 700;
+ line-height: 1.15;
+ color: #1a1200;
+ text-shadow: 0 0 4px #fff9e6, 0 0 2px #fff9e6;
+ margin-bottom: 1px;
+}
+/* ABANDONED view: a flat yellow disc — black text needs no halo against its own solid,
+   known-bright background. */
+.explore-shell .composition-marker.composition-abandoned .bubble-value,
+.explore-shell .composition-marker.composition-abandoned .bubble-value:only-child,
+.explore-shell .composition-marker.composition-abandoned .bubble-label {
+ color: #1a1200;
+ text-shadow: none;
+}

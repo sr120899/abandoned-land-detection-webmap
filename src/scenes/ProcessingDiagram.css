@@ -1,0 +1,49 @@
+/* Each expanded stage is one connected diagram, rather than isolated cards. */
+.satellite-shell .processing-diagram { margin: 20px 0 0; padding: 18px; border: 1px solid #1e6171; border-radius: 12px; background: radial-gradient(ellipse at 50% 45%, #07525a40, transparent 70%), #001e2a; }
+.processing-sequence { display: flex; gap: 28px; padding: 0; margin: 0 0 20px; list-style: none; }
+.processing-sequence li { position: relative; flex: 1; min-width: 0; display: flex; align-items: stretch; }
+.processing-sequence li > span { display: grid; place-items: center; width: 100%; padding: 9px 8px; min-height: 44px; border: 1px solid #26949e; border-radius: 7px; background: #043540; color: #d5f6f4; font-size: 11px; line-height: 1.4; text-align: center; }
+.processing-sequence .flow-arrow { position: absolute; right: -26px; top: 50%; transform: translateY(-50%); }
+.processing-canvas { display: grid; grid-template-columns: repeat(var(--node-count), minmax(0, 1fr)); gap: 32px; }
+.processing-node { min-width: 0; }
+.processing-node-art { position: relative; display: grid; place-items: center; height: clamp(145px, 13vw, 210px); }
+.processing-node-art > .method-visual { width: 100%; height: 100%; max-width: 240px; }
+.processing-node-link { position: absolute; width: 32px; right: -32px; top: 50%; display: grid; place-items: center; transform: translateY(-50%); }
+.processing-node .processing-node-caption { border-top: 1px solid #1a5464; padding-top: 12px; margin-top: 8px; }
+.processing-node .processing-node-caption > b { display: block; color: #e6f5fa; font-size: 13px; }
+.satellite-shell .method-v2 .processing-node .processing-node-caption p { font-size: 12px; margin-top: 5px; line-height: 1.55; }
+.classification-split { position: relative; display: grid; gap: 12px; padding-left: 18px; width: 100%; }
+.classification-split::before { content: ''; position: absolute; left: 0; top: 25%; height: 50%; width: 16px; border: 1px solid #38d5d4; border-right: 0; }
+.classification-branch { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 9px; position: relative; }
+.classification-branch::before { content: ''; width: 5px; height: 5px; border-top: 1px solid #38d5d4; border-right: 1px solid #38d5d4; transform: rotate(45deg); position: absolute; left: -6px; }
+.classification-branch svg { width: 100%; }
+.classification-branch b { display: block; font-size: 13px; }
+.classification-branch span { display: block; color: #afccd7; font-size: 10px; line-height: 1.4; }
+.parallel-signals { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+.parallel-signals .method-visual { width: 100%; }
+.parallel-signals span { display: block; text-align: center; font-size: 10px; color: #72d7d4; }
+.processing-endpoints { display: grid; grid-template-columns: 1fr 24px 1fr; align-items: center; gap: 18px; padding-top: 16px; margin-top: 18px; border-top: 1px dashed #235d6a; }
+.processing-endpoints > span { font-size: 11px; color: #a8c9d6; }
+.processing-endpoints b { display: block; font-size: 9px; letter-spacing: .12em; color: #61e7da; margin-bottom: 4px; }
+@media (max-width: 1450px) and (min-width: 1251px) {
+ .satellite-shell .method-v2 .workflow-detail-panel { grid-template-columns: minmax(0, 1fr); }
+ .satellite-shell .method-v2 .workflow-summary { padding: 18px 0 0; border-left: 0; border-top: 1px solid #197e8b; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+ .satellite-shell .method-v2 .workflow-summary > header { grid-column: 1/-1; }
+}
+@media (max-width: 760px) {
+ .processing-sequence { flex-direction: column; gap: 20px; }
+ .processing-sequence .flow-arrow { right: calc(50% - 12px); top: auto; bottom: -22px; transform: rotate(90deg); height: 20px; }
+ .processing-canvas { grid-template-columns: minmax(0,1fr); gap: 32px; }
+ .processing-node { display: grid; grid-template-columns: minmax(110px, .9fr) minmax(0,1.1fr); gap: 16px; align-items: center; }
+ .processing-node-art { height: 155px; }
+ .processing-node .processing-node-caption { margin: 0; padding: 0; border: 0; }
+ .processing-node-link { top: auto; bottom: -32px; left: calc(50% - 12px); right: auto; height: 32px; width: 24px; transform: none; }
+ .processing-node-link .flow-arrow { transform: rotate(90deg); }
+ .classification-branch { grid-template-columns: 1fr; gap: 0; }
+ .classification-branch svg { max-height: 42px; }
+ .classification-branch > div { display: flex; gap: 5px; align-items: center; }
+ .classification-branch b { font-size: 10px; }
+ .classification-branch span { font-size: 9px; }
+ .classification-split { gap: 8px; }
+ .processing-endpoints { gap: 10px; }
+}

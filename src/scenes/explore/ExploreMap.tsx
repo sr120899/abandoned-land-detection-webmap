@@ -1,7 +1,7 @@
+import './CaseStudyMarkers.css'
 import { useEffect, useRef, useState } from 'react'
 import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { REGION_NAMES } from '../../hooks/useBoundaryData'
 import type { AmphoeFeature, AmphoeProps } from '../../hooks/useBoundaryData'
 
 const BASE = import.meta.env.BASE_URL
@@ -35,8 +35,10 @@ interface Props {
   provinceCode: string
   districtCode: string
   showBoundaryLines: boolean
+  showClusters: boolean
   showPixelRaster: boolean // display toggle for the classification/analysis raster overlay
   showAnalysis: boolean // Analysis toggle — swaps the raster to bivariate + shows case markers
+  showAbandoned: boolean // Abandoned toggle — single-color raster + flat yellow cluster markers
   hoveredProvince: string // externally-hovered province code (e.g. from the Top 5 bar chart), '' if none
   hoveredDistrict: string // externally-hovered amphoe code (e.g. from the Top districts bar chart), '' if none
   onSelectRegion: (region: string) => void
@@ -62,6 +64,31 @@ function boundsToCoords(b: RasterBounds): [[number, number], [number, number], [
     [b.east, b.south],
     [b.west, b.south],
   ]
+}
+
+// No dedicated "abandoned only" dataset exists, and this maplibre-gl build has no
+// raster-color paint property — so recolor the classification PNG client-side instead:
+// any classified pixel (C1 or C2) becomes flat yellow, transparency is left untouched.
+async function recolorToYellow(url: string): Promise<ImageBitmap> {
+  const blob = await fetch(url).then((r) => r.blob())
+  const srcBitmap = await createImageBitmap(blob)
+  const canvas = document.createElement('canvas')
+  canvas.width = srcBitmap.width
+  canvas.height = srcBitmap.height
+  const ctx = canvas.getContext('2d')!
+  ctx.drawImage(srcBitmap, 0, 0)
+  srcBitmap.close()
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+  const data = imageData.data
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] > 0) {
+      data[i] = 250
+      data[i + 1] = 204
+      data[i + 2] = 21
+    }
+  }
+  ctx.putImageData(imageData, 0, 0)
+  return createImageBitmap(canvas)
 }
 
 // Area-weighted centroid of a feature's largest ring — a plain vertex average
@@ -138,7 +165,9 @@ function ExploreMap({
   districtCode,
   showBoundaryLines,
   showPixelRaster,
+  showClusters,
   showAnalysis,
+  showAbandoned,
   hoveredProvince,
   hoveredDistrict,
   onSelectRegion,
@@ -227,6 +256,7 @@ function ExploreMap({
     })
     mapRef.current = map
     map.addControl(new maplibregl.NavigationControl(), 'top-right')
+    map.addControl(new maplibregl.ScaleControl({ maxWidth: 130, unit: 'metric' }), 'bottom-right')
 
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: 'boundary-popup' })
     popupRef.current = popup
@@ -243,7 +273,10 @@ function ExploreMap({
     function bindHover(
       layerId: string,
       sourceId: string,
-      buildHtml: (props: Record<string, unknown>) => string,
+      // null = keep the hover-highlight glow on the polygon but skip the text
+      // popup (used for regions, where the bubble marker already shows the
+      // same "<name> / <count> px" info — the popup was just a duplicate).
+      buildHtml: ((props: Record<string, unknown>) => string) | null,
       onChange?: (props: Record<string, unknown> | null) => void,
     ) {
       map.on('mousemove', layerId, (e: maplibregl.MapLayerMouseEvent) => {
@@ -257,7 +290,7 @@ function ExploreMap({
           map.setFeatureState(hoverRef.current, { hover: true })
           onChange?.(feature.properties ?? {})
         }
-        popup.setLngLat(e.lngLat).setHTML(buildHtml(feature.properties ?? {})).addTo(map)
+        if (buildHtml) popup.setLngLat(e.lngLat).setHTML(buildHtml(feature.properties ?? {})).addTo(map)
       })
       map.on('mouseleave', layerId, () => {
         map.getCanvas().style.cursor = ''
@@ -295,6 +328,22 @@ function ExploreMap({
         paint: { 'raster-opacity': 1, 'raster-resampling': 'nearest' },
       })
 
+      // Single-color "detected or not" view — recolored client-side from province-type
+      // (any classified pixel, C1 or C2, becomes flat yellow) since there's no separate
+      // binary dataset and this maplibre-gl build has no raster-color paint property.
+      map.addSource('province-abandoned', {
+        type: 'image',
+        url: `${BASE}data/province_type/10.png`,
+        coordinates: boundsToCoords({ west: 100, south: 13, east: 100.01, north: 13.01 }),
+      })
+      map.addLayer({
+        id: 'province-abandoned-layer',
+        type: 'raster',
+        source: 'province-abandoned',
+        layout: { visibility: 'none' },
+        paint: { 'raster-opacity': 1, 'raster-resampling': 'nearest' },
+      })
+
       map.addSource('province-bivariate', {
         type: 'image',
         url: `${BASE}data/province_bivariate/10.png`,
@@ -329,11 +378,7 @@ function ExploreMap({
         source: 'regions',
         paint: { 'line-color': '#ffffff', 'line-width': 1.5, 'line-dasharray': LINE_SOLID },
       })
-      bindHover('regions-fill', 'regions', (p) => {
-        const code = String(p.Region ?? '')
-        const total = (Number(p.px_type1) || 0) + (Number(p.px_type2) || 0)
-        return `<strong>${REGION_NAMES[code] ?? code}</strong><br/>${total.toLocaleString()} px detected`
-      })
+      bindHover('regions-fill', 'regions', null)
 
       const provinceGeo = await fetch(`${BASE}data/province_stats.geojson`).then((r) => r.json())
       provinceGeoRef.current = provinceGeo
@@ -357,10 +402,7 @@ function ExploreMap({
       })
       bindHover(
         'province-fill', 'provinces',
-        (p) => {
-          const total = (Number(p.px_type1) || 0) + (Number(p.px_type2) || 0)
-          return `<strong>${p.PROV_NAM_E}</strong><br/>${total.toLocaleString()} px detected`
-        },
+        null,
         (p) => onHoverProvinceRef.current(p ? String(p.PROV_CODE ?? '') : ''),
       )
 
@@ -402,10 +444,7 @@ function ExploreMap({
       })
       bindHover(
         'boundary-fill', 'boundary-source',
-        (p) => {
-          const total = (Number(p.px_type1) || 0) + (Number(p.px_type2) || 0)
-          return `<strong>${p.AMPHOE_E}</strong><br/>${p.PROV_NAM_E}<br/>${total.toLocaleString()} px detected`
-        },
+        null,
         (p) => onHoverDistrictRef.current(p ? String(p.AMP_CODE ?? '') : ''),
       )
 
@@ -452,42 +491,10 @@ function ExploreMap({
         paint: { 'text-color': '#ffffff', 'text-halo-color': '#0b1220', 'text-halo-width': 1.2 },
       })
 
-      map.addSource('cases', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
-      map.addLayer({
-        id: 'cases-circle',
-        type: 'circle',
-        source: 'cases',
-        layout: { visibility: 'none' },
-        paint: { 'circle-radius': 8, 'circle-color': '#38bdf8', 'circle-stroke-width': 2, 'circle-stroke-color': '#001018' },
-      })
-      map.addLayer({
-        id: 'cases-label',
-        type: 'symbol',
-        source: 'cases',
-        layout: {
-          visibility: 'none',
-          'text-field': [
-            'match', ['get', 'case_name'],
-            'point_1', 'Case study 1',
-            'point_4', 'Case study 2',
-            'point_5', 'Case study 3',
-            ['get', 'case_name'],
-          ],
-          'text-size': 12,
-          'text-offset': [0, 1.4],
-        },
-        paint: { 'text-color': '#e7ecf7', 'text-halo-color': '#0b1220', 'text-halo-width': 1.2 },
-      })
-      map.on('click', 'cases-circle', (e: maplibregl.MapLayerMouseEvent) => {
-        const name = e.features?.[0]?.properties?.case_name as string | undefined
-        if (name) onSelectCaseRef.current(name)
-      })
-      map.on('mouseenter', 'cases-circle', () => (map.getCanvas().style.cursor = 'pointer'))
-      map.on('mouseleave', 'cases-circle', () => (map.getCanvas().style.cursor = ''))
-
       // Pixel raster draws above every vector layer, so the classification is never
       // obscured by boundary fills/lines/labels.
       map.moveLayer('province-type-layer')
+      map.moveLayer('province-abandoned-layer')
       map.moveLayer('province-bivariate-layer')
 
       // Single click router — replaces separate per-layer click handlers so exactly
@@ -502,7 +509,7 @@ function ExploreMap({
       //  3. On a still-drillable sub-area -> navigate into it.
       map.on('click', (e: maplibregl.MapMouseEvent) => {
         const target = e.originalEvent?.target as HTMLElement | null
-        if (target?.closest?.('.bubble-marker')) return
+        if (target?.closest?.('.bubble-marker, .case-study-marker')) return
 
         if (map.queryRenderedFeatures(e.point, { layers: ['mask-layer'] }).length > 0) {
           onClickOutsideRef.current()
@@ -532,13 +539,27 @@ function ExploreMap({
       // abandoned-land pixel. Kept off the default double-click-zoom so it doesn't
       // fight with pixel inspection.
       map.doubleClickZoom.disable()
-      const coordPopup = new maplibregl.Popup({ closeButton: true, closeOnClick: true, className: 'coord-popup' })
+      // Styled like a map-app location label (Google Maps-style pill + dot) rather
+      // than a bordered "Coordinates" info box: anchor:'bottom' + offset keeps the
+      // pill floating just above the actual point, where a small dot marker marks
+      // the exact spot — closer to how people already read location labels elsewhere.
+      const coordPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: true, className: 'coord-popup', anchor: 'bottom', offset: 14 })
+      let coordMarker: maplibregl.Marker | null = null
+      function clearCoordMarker() {
+        coordMarker?.remove()
+        coordMarker = null
+      }
+      coordPopup.on('close', clearCoordMarker)
       map.on('dblclick', (e: maplibregl.MapMouseEvent) => {
         const target = e.originalEvent?.target as HTMLElement | null
-        if (target?.closest?.('.bubble-marker')) return
+        if (target?.closest?.('.bubble-marker, .case-study-marker')) return
+        clearCoordMarker()
+        const dot = document.createElement('div')
+        dot.className = 'coord-dot'
+        coordMarker = new maplibregl.Marker({ element: dot }).setLngLat(e.lngLat).addTo(map)
         coordPopup
           .setLngLat(e.lngLat)
-          .setHTML(`<strong>📍 Coordinates</strong><br/>${e.lngLat.lat.toFixed(6)}, ${e.lngLat.lng.toFixed(6)}`)
+          .setHTML(`<span class="coord-text">${e.lngLat.lat.toFixed(6)}, ${e.lngLat.lng.toFixed(6)}</span>`)
           .addTo(map)
       })
 
@@ -562,24 +583,52 @@ function ExploreMap({
     const map = mapRef.current
     if (!map || !mapLoaded) return
 
+    let cancelled = false
     function addBubbles(
-      items: { code: string; label: string; coord: [number, number]; total: number; onClick: () => void }[],
+      items: { code: string; label: string; coord: [number, number]; total: number; c1: number; onClick: () => void }[],
+      opts?: { showLabel?: boolean },
     ) {
-      if (!map) return
+      if (!map || cancelled) return
       markersRef.current.forEach((m) => m.remove())
       markersRef.current = []
-      if (items.length === 0) return
+      if (items.length === 0 || !showClusters || showAnalysis) return
 
       const maxTotal = Math.max(...items.map((i) => i.total), 1)
       const sorted = [...items].sort((a, b) => b.total - a.total) // biggest first -> rendered underneath
 
+      const compact = items.length > 10
       sorted.forEach((item) => {
-        const size = 26 + (item.total / maxTotal) * 46
-        const el = document.createElement('div')
-        el.className = 'bubble-marker'
+        const size = compact ? 30 + Math.sqrt(item.total / maxTotal) * 28 : 46 + Math.sqrt(item.total / maxTotal) * 42
+        const el = document.createElement('button')
+        el.type = 'button'
+        el.className = `bubble-marker composition-marker${compact ? ' composition-compact' : ''}${showAbandoned ? ' composition-abandoned' : ''}`
+        const share = item.total > 0 ? item.c1 / item.total * 100 : 0
+        el.style.setProperty('--c1-share', share + '%')
+        el.title = item.label + ': ' + item.total.toLocaleString() + ' pixels; C1 ' + share.toFixed(1) + '%, C2 ' + (100 - share).toFixed(1) + '%. Click to explore.'
+        el.setAttribute('aria-label', el.title)
         el.style.width = `${size}px`
         el.style.height = `${size}px`
-        el.innerHTML = `<div class="bubble-label">${item.label}</div><div class="bubble-value">${(item.total / 1000).toFixed(1)}k</div>`
+        const value = document.createElement('span')
+        value.className = 'bubble-value'
+        value.textContent = item.total >= 1000 ? (item.total / 1000).toFixed(0) + 'k' : String(item.total)
+        // The pixel count is always the primary read. Size tracks circle diameter first
+        // (bigger totals always read bigger), only backing off to fit the text when a
+        // longer number would otherwise overflow.
+        const sizeBasedNumber = size * (compact ? 0.24 : 0.23)
+        const widthFitNumber = (size - (compact ? 10 : 20)) / (value.textContent.length * 0.62)
+        const numberSize = Math.max(compact ? 9 : 11, Math.min(compact ? 15 : 22, sizeBasedNumber, widthFitNumber))
+        el.style.setProperty('--bubble-number-size', `${numberSize}px`)
+        if (opts?.showLabel) {
+          // Region abbreviation stays a small supporting tag above the count.
+          const label = document.createElement('span')
+          label.className = 'bubble-label'
+          label.textContent = item.label
+          const labelSize = Math.max(8, Math.min(13, size * 0.115))
+          el.style.setProperty('--bubble-label-size', `${labelSize}px`)
+          el.append(label, value)
+        } else {
+          el.append(value)
+        }
         el.onclick = item.onClick
         const marker = new maplibregl.Marker({ element: el }).setLngLat(item.coord).addTo(map)
         markersRef.current.push(marker)
@@ -590,7 +639,9 @@ function ExploreMap({
       if (regionCode === '') {
         const centroids: Record<string, [number, number]> = await fetch(`${BASE}data/region_centroids.json`).then((r) => r.json())
         const totals = new Map<string, number>()
+        const c1Totals = new Map<string, number>()
         for (const f of nationalFeatures) {
+          c1Totals.set(f.properties.Region, (c1Totals.get(f.properties.Region) ?? 0) + f.properties.px_type1)
           totals.set(f.properties.Region, (totals.get(f.properties.Region) ?? 0) + f.properties.px_type1 + f.properties.px_type2)
         }
         addBubbles(
@@ -599,8 +650,10 @@ function ExploreMap({
             label: code,
             coord,
             total: totals.get(code) ?? 0,
+            c1: c1Totals.get(code) ?? 0,
             onClick: () => onSelectRegionRef.current(code),
           })),
+          { showLabel: true },
         )
       } else if (provinceCode === '') {
         const provinceGeo = await fetch(`${BASE}data/province_stats.geojson`).then((r) => r.json())
@@ -615,6 +668,7 @@ function ExploreMap({
                   label: p.PROV_NAM_E,
                   coord: c,
                   total: p.px_type1 + p.px_type2,
+                  c1: p.px_type1,
                   onClick: () => onSelectProvinceRef.current(String(p.PROV_CODE)),
                 }]
               : []
@@ -631,6 +685,7 @@ function ExploreMap({
                   label: p.AMPHOE_E,
                   coord: c,
                   total: p.px_type1 + p.px_type2,
+                  c1: p.px_type1,
                   onClick: () => onSelectDistrictRef.current(p.AMP_CODE),
                 }]
               : []
@@ -641,8 +696,11 @@ function ExploreMap({
       }
     }
 
-    rebuild()
-  }, [regionCode, provinceCode, districtCode, boundaryFeatures, nationalFeatures, mapLoaded])
+    rebuild().catch(() => { if (!cancelled) addBubbles([]) })
+    return () => {
+      cancelled = true
+    }
+  }, [regionCode, provinceCode, districtCode, boundaryFeatures, nationalFeatures, mapLoaded, showClusters, showAbandoned, showAnalysis])
 
   // Reflect dashboard-driven hover (e.g. the Top 5 provinces bar chart) onto the
   // map's province fill, so pointing at either side highlights the other.
@@ -732,8 +790,7 @@ function ExploreMap({
       'case', ['==', ['get', 'AMP_CODE'], districtCode], ['literal', LINE_SOLID], ['literal', LINE_DASHED],
     ])
 
-    setVis('cases-circle', showAnalysis)
-    setVis('cases-label', showAnalysis)
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [regionCode, provinceCode, districtCode, showBoundaryLines, showAnalysis, showPixelRaster, mapLoaded])
 
@@ -801,7 +858,7 @@ function ExploreMap({
     const map = mapRef.current
     if (!map || !mapLoaded) return
 
-    async function applyProvinceRaster(dataDir: string, sourceId: string, layerId: string, show: boolean) {
+    async function applyProvinceRaster(dataDir: string, sourceId: string, layerId: string, show: boolean, recolor?: boolean) {
       const map2 = mapRef.current
       if (!map2) return
       if (!show) {
@@ -814,7 +871,13 @@ function ExploreMap({
           return r.json()
         })
         const source = map2.getSource(sourceId) as maplibregl.ImageSource | undefined
-        source?.updateImage({ url: `${BASE}data/${dataDir}/${provinceCode}.png`, coordinates: boundsToCoords(bounds) })
+        const pngUrl = `${BASE}data/${dataDir}/${provinceCode}.png`
+        if (recolor) {
+          const bitmap = await recolorToYellow(pngUrl)
+          source?.updateImage({ image: bitmap, coordinates: boundsToCoords(bounds) })
+        } else {
+          source?.updateImage({ url: pngUrl, coordinates: boundsToCoords(bounds) })
+        }
         map2.setLayoutProperty(layerId, 'visibility', 'visible')
       } catch {
         map2.setLayoutProperty(layerId, 'visibility', 'none')
@@ -823,21 +886,56 @@ function ExploreMap({
 
     applyProvinceRaster(
       'province_type', 'province-type', 'province-type-layer',
-      !showAnalysis && provinceCode !== '' && showPixelRaster,
+      !showAnalysis && !showAbandoned && provinceCode !== '' && showPixelRaster,
+    )
+    applyProvinceRaster(
+      'province_type', 'province-abandoned', 'province-abandoned-layer',
+      showAbandoned && provinceCode !== '' && showPixelRaster,
+      true,
     )
     applyProvinceRaster(
       'province_bivariate', 'province-bivariate', 'province-bivariate-layer',
       showAnalysis && provinceCode !== '' && showPixelRaster,
     )
-  }, [provinceCode, showAnalysis, showPixelRaster, mapLoaded])
+  }, [provinceCode, showAnalysis, showAbandoned, showPixelRaster, mapLoaded])
 
-  // Keep case-study markers in sync with the current filter.
+  // DOM markers stay above raster and vector layers, on every basemap.
   useEffect(() => {
     const map = mapRef.current
-    if (!map || !mapLoaded) return
-    const source = map.getSource('cases') as maplibregl.GeoJSONSource | undefined
-    source?.setData({ type: 'FeatureCollection', features: caseFeatures })
-  }, [caseFeatures, mapLoaded])
+    if (!map || !mapLoaded || regionCode !== 'C' || provinceCode === '') return
+    const labels: Record<string, string> = { point_1: '1', point_4: '2', point_5: '3' }
+    const markers: maplibregl.Marker[] = []
+    for (const feature of caseFeatures) {
+      if (feature.geometry?.type !== 'Point') continue
+      const name = feature.properties?.case_name as string | undefined
+      if (!name) continue
+      const number = labels[name] ?? ''
+      const label = number ? `Case study ${number}` : name
+      const element = document.createElement('div')
+      element.className = 'case-study-marker'
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.className = 'case-study-marker-button'
+      button.setAttribute('aria-label', `Open ${label}`)
+      const badge = document.createElement('span')
+      badge.className = 'case-study-marker-number'
+      badge.textContent = number || '+'
+      badge.setAttribute('aria-hidden', 'true')
+      const text = document.createElement('span')
+      text.className = 'case-study-marker-label'
+      text.textContent = label
+      button.append(badge, text)
+      button.addEventListener('click', event => {
+        event.stopPropagation()
+        onSelectCaseRef.current(name)
+      })
+      button.addEventListener('dblclick', event => event.stopPropagation())
+      element.append(button)
+      const [lng, lat] = feature.geometry.coordinates
+      markers.push(new maplibregl.Marker({ element, anchor: 'center', offset: [0, 0] }).setLngLat([lng, lat]).addTo(map))
+    }
+    return () => { markers.forEach(marker => marker.remove()) }
+  }, [caseFeatures, regionCode, provinceCode, mapLoaded])
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>

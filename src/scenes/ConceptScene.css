@@ -1,0 +1,178 @@
+.line-icon { width: 28px; height: 28px; display: block; }
+.brand-logo .line-icon { width: 48px; height: 48px; }
+.top-tab-icon { vertical-align: middle; margin-right: 10px; }
+.satellite-shell { --bg: #00121f; --bg-panel: #001520; --accent: #25eee9; --accent-2: #25eee9; --text: #f1f4fc; --text-dim: #bac9d7; --border: #175166; background: var(--bg); }
+.satellite-shell .app-header { padding: 12px 32px; min-height: 72px; }
+.satellite-shell .brand-block { gap: 24px; }
+.satellite-shell .brand-title { font-size: 19px; letter-spacing: .8px; }
+.satellite-shell .brand-subtitle { font-size: 14px; }
+.satellite-shell .top-tabs { gap: 46px; }
+.satellite-shell .top-tab { position: relative; border: 0; font-size: 18px; padding: 6px 0 12px; color: var(--text); }
+.satellite-shell .top-tab.active { color: var(--accent); }
+.satellite-shell .top-tab.active::after { content: ''; position: absolute; height: 5px; border-radius: 5px; background: var(--accent); bottom: 0; left: 40px; right: 0; }
+.satellite-shell button:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+.concept-page { padding: 0 32px 12px; height: auto; min-height: calc(100vh - 138px); overflow: hidden; background: radial-gradient(ellipse at 10% 65%, #03324655, transparent 45%), #00121f; }
+.concept-page .concept-hero {
+  position: relative;
+  isolation: isolate;
+  grid-template-columns: 29% 1fr;
+  gap: 16px;
+  min-height: 285px;
+  margin: 0;
+  align-items: start;
+  border: 1px solid #296174;
+  border-radius: 20px;
+  padding: 32px;
+  overflow: hidden;
+  background: linear-gradient(90deg, #00121ffa 8%, #00121fb8 45%, #00121f20 78%), url('../assets/concept-landscape.png') center 48% / cover;
+  box-shadow: inset 0 1px #ffffff0a, 0 20px 50px #00000020;
+}
+/* Same eyebrow/H1 scale as Method's .method-intro — kept identical across
+   pages on purpose, so don't let a page-specific override drift from it. */
+.concept-page .eyebrow-label { font-size: 11px; letter-spacing: 2px; margin-bottom: 14px; }
+.concept-page .hero-title { font-size: clamp(28px, 2.6vw, 43px); line-height: 1.12; margin-bottom: 12px; letter-spacing: -1px; }
+.concept-page .hero-desc { font-size: clamp(12px, .92vw, 16px); line-height: 1.4; margin: 0; color: #dbe4ed; }
+.concept-page .hero-visual-wrap { position: relative; height: 285px; }
+.concept-page .hero-visual { height: 100%; border: 0; background: none; overflow: visible; }
+.concept-page .hero-sat, .concept-page .hero-layers { display: none; }
+.concept-page .hero-corner-note { position: absolute; right: 0; top: 0; font-size: 10px; line-height: 1.8; letter-spacing: 2.5px; width: 112px; color: #cddbe7; text-align: right; text-shadow: 0 1px 4px #00121fcc, 0 0 10px #00121fcc; }
+.concept-page .hero-badge { position: absolute; top: auto; bottom: 62px; display: flex; align-items: flex-start; gap: 12px; width: 208px; padding: 10px 12px; border: 1px solid #29e8e6; background: #00121feb; border-radius: 13px; box-shadow: 0 0 14px #00eded17; }
+.concept-page .hero-badge-left { left: 0; }
+.concept-page .hero-badge-right { right: 0; width: 270px; bottom: 42px; }
+.concept-page .hero-badge-icon { color: var(--accent); }
+.concept-page .hero-badge-icon .line-icon { width: 36px; height: 36px; }
+.concept-page .hero-badge-title { color: #9bf595; font-size: 13px; margin-bottom: 5px; }
+.concept-page .hero-badge-desc { color: #e0e8f0; font-size: 12px; line-height: 1.35; }
+.concept-page .hero-ai-tag { position: absolute; bottom: 4px; left: 35%; display: flex; align-items: center; gap: 14px; max-width: 320px; margin: 0; }
+.concept-page .hero-ai-tag-icon { border: 1px solid var(--accent); border-radius: 50%; padding: 10px; color: var(--accent); }
+.concept-page .hero-ai-tag-title { color: #64f4b0; font-size: 13px; }
+.concept-page .hero-ai-tag-desc { font-size: 12px; color: #d5dfec; }
+.concept-page .history-panel { position: relative; border: 1px solid #176078; border-radius: 14px; padding: 8px 25px 17px; background: #00111de8; }
+.concept-page .history-panel-title { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+.concept-page .flow-row { display: grid; grid-template-columns: 1.15fr .52fr 1.15fr .35fr 2.6fr 2fr; align-items: center; gap: 12px; margin: 0; }
+.concept-page .flow-card { width: auto; background: none; border: 0; padding: 0; text-align: center; gap: 6px; }
+.concept-page .flow-badge { font-size: 13px; }
+.concept-page .flow-thumb { height: 96px; border: 1px solid var(--accent); box-shadow: 0 0 9px #25eee933; background: url('/photos/point_4/abandoned_land_point_4_active_use.png') center / cover; }
+.concept-page .flow-thumb.dim { background-image: url('/photos/point_4/abandoned_land_point_4_2025.png'); filter: none; }
+.concept-page .flow-thumb-icon { width: 42px; height: 42px; bottom: -23px; background: #001520; }
+.concept-page .flow-caption { font-size: 13px; color: #e3eaf2; line-height: 1.35; margin-top: 20px; }
+.concept-page .flow-arrow { justify-self: center; border: 1px solid var(--accent); border-radius: 50%; padding: 8px; color: var(--accent); position: relative; }
+.concept-page .flow-arrow::before { content: ''; position: absolute; top: 50%; left: -100%; width: 300%; height: 2px; background: var(--accent); z-index: -1; }
+.concept-page .flow-shuffle { width: 42px; height: 42px; }
+.concept-page .flow-branches { gap: 27px; }
+.concept-page .branch { border: 0; background: none; padding: 0; gap: 17px; color: #90f38b; }
+.concept-page .branch.warn { color: #ffc52e; }
+.concept-page .branch-icon { border: 1px solid currentColor; padding: 10px; border-radius: 50%; }
+.concept-page .branch > div { flex: 1; }
+.concept-page .branch-title { font-size: 12px; line-height: 1.3; }
+.concept-page .branch-timeline { display: flex; position: relative; flex-wrap: nowrap; justify-content: space-between; gap: 0; padding-top: 15px; color: inherit; }
+.concept-page .branch-timeline::before { content: ''; position: absolute; top: 6px; left: 0; right: 12px; border-top: 3px dotted currentColor; }
+.concept-page .year { position: relative; font-size: 11px; }
+.concept-page .year::before { content: ''; position: absolute; top: -13px; left: 3px; width: 10px; height: 10px; background: currentColor; border-radius: 50%; box-shadow: 0 0 0 2px #00121f; }
+.concept-page .warn .year:nth-child(3)::after { content: 'RETURN'; position: absolute; top: 14px; left: -10px; font-size: 9px; }
+.concept-page .branch-timeline .arrow { font-size: 40px; line-height: 0; color: inherit; margin-top: -7px; }
+.concept-page .outcome-cards { min-width: 0; gap: 12px; }
+.concept-page .outcome-card { background: transparent; min-height: 90px; padding: 9px; border-color: #a8e965; border-radius: 14px; }
+.concept-page .outcome-card.warn { border-color: #ffc52e; }
+.concept-page .outcome-thumb { width: 34%; height: 70px; background: url('/photos/point_4/abandoned_land_point_4_2025.png') center / cover; border: 1px solid #9ddb64; }
+.concept-page .warn .outcome-thumb { background-image: url('/photos/point_4/abandoned_land_point_4_active_use.png'); border-color: #ffc52e; }
+.concept-page .outcome-title { font-size: 13px; color: #b3f276; }
+.concept-page .warn .outcome-title { color: #ffc52e; }
+.concept-page .outcome-desc { font-size: 11px; color: #e3eaf2; line-height: 1.4; }
+.concept-page .outcome-icon { display: none; }
+.concept-page .quote-bar { position: relative; justify-content: center; border: 0; margin: -3px 0 5px; padding: 0; min-height: 47px; gap: 12px; }
+.concept-page .quote-text { background: #00121f; border: 1px solid var(--accent); border-radius: 40px; padding: 5px 25px; font-size: clamp(15px, 1.35vw, 23px); box-shadow: 0 0 18px #00ffff20; }
+.concept-page .quote-mark { font-size: 30px; color: var(--accent); margin: 0 12px; vertical-align: middle; }
+.concept-page .quote-caption { position: absolute; right: 0; font-size: 9px; letter-spacing: 2px; color: #7290a6; }
+.concept-page .info-panel { background: #00131eaf; border-color: #176078; border-radius: 14px; padding: 10px 18px 8px; }
+.concept-page .panel-title { font-size: 19px; letter-spacing: 0; margin-bottom: 5px; }
+.concept-page .obj-grid { gap: 0; }
+.concept-page .obj-item { text-align: center; padding: 0 12px; border-right: 1px dashed #176078; }
+.concept-page .obj-item:last-child { border: 0; }
+.concept-page .obj-icon { width: 57px; height: 57px; display: grid; place-items: center; border: 1px solid var(--accent); border-radius: 50%; margin: 0 auto 5px; color: var(--accent); }
+.concept-page .obj-icon .line-icon { width: 32px; height: 32px; }
+.concept-page .obj-name { font-size: 14px; }
+.concept-page .obj-desc { font-size: 13px; line-height: 1.5; color: #e5eaf1; }
+.concept-page .aiml-note { border: 0; padding: 0; margin: 8px 0 0; font-size: 12px; justify-content: flex-end; }
+.satellite-shell .app-footer { min-height: 66px; background: #00101e; }
+.satellite-shell .footer-brand { font-size: 14px; letter-spacing: 1px; }
+.satellite-shell .step-dots { gap: 28px; }
+.satellite-shell .step-dot { position: relative; width: 42px; height: 42px; background: none; font-size: 14px; border-color: #5c617b; }
+.satellite-shell .step-dot.active { border-color: var(--accent); color: white; }
+.satellite-shell .step-dot.active::after { content: ''; position: absolute; bottom: -8px; left: 0; right: 0; height: 5px; background: var(--accent); border-radius: 5px; }
+.satellite-shell .step-nav-btn { background: transparent; }
+.satellite-shell .footer-note { max-width: 240px; font-size: 9px; line-height: 1.8; letter-spacing: 2px; }
+@media (min-width: 1500px) {
+ .concept-page .concept-hero, .concept-page .hero-visual-wrap { min-height: 285px; height: 30.5vh; }
+ .concept-page .history-panel { padding-bottom: 20px; }
+ .concept-page .flow-thumb { height: 100px; }
+ .concept-page .info-panel { min-height: 207px; }
+ .concept-page .obj-desc { font-size: 15px; }
+ .concept-page .obj-name { font-size: 16px; }
+ .concept-page .history-panel { min-height: 250px; }
+ .concept-page .flow-row { margin-top: 18px; }
+}
+@media (max-width: 1250px) {
+ .concept-page .quote-caption { display: none; }
+ .satellite-shell .top-tabs { gap: 22px; }
+ .satellite-shell .top-tab { font-size: 14px; }
+ .concept-page .flow-row { grid-template-columns: 1fr .25fr 1fr .25fr 1.8fr 1.6fr; gap: 9px; }
+ .concept-page .branch-icon { display: none; }
+ .concept-page .outcome-thumb { width: 28%; }
+ .concept-page .hero-badge-right { width: 220px; }
+}
+@media (max-width: 950px) {
+ .satellite-shell .brand-title { font-size: 15px; }
+ .satellite-shell .brand-subtitle { font-size: 11px; }
+ .satellite-shell .brand-block { gap: 12px; }
+ .concept-page .concept-hero { grid-template-columns: 1fr; }
+ .concept-page .hero-copy { max-width: 470px; }
+ .concept-page .hero-title { width: auto; font-size: 38px; }
+ .concept-page .hero-desc { font-size: 14px; }
+ .concept-page .hero-visual-wrap { height: 240px; }
+ .concept-page .hero-corner-note { top: 0; }
+ .concept-page .hero-ai-tag { left: 30%; }
+ .concept-page .flow-row { grid-template-columns: 1fr 50px 1fr; row-gap: 25px; }
+ .concept-page .flow-shuffle { display: none; }
+ .concept-page .flow-branches { grid-column: 1 / 3; }
+ .concept-page .dual-panel-row { flex-direction: column; }
+ .concept-page .flow-thumb { height: 120px; }
+ .concept-page .obj-desc { font-size: 14px; }
+ .concept-page .quote-bar { margin: 10px 0; }
+}
+@media (max-width: 640px) {
+ .satellite-shell .app-header { padding: 12px 16px; gap: 15px; }
+ .satellite-shell .brand-logo .line-icon { width: 35px; height: 35px; }
+ .satellite-shell .top-tabs { width: 100%; justify-content: space-between; gap: 8px; }
+ .satellite-shell .top-tab { font-size: 12px; }
+ .satellite-shell .top-tab-icon { margin-right: 3px; }
+ .satellite-shell .top-tab-icon .line-icon { width: 23px; height: 23px; }
+ .concept-page { padding: 0 16px 18px; }
+ .concept-page .hero-title { font-size: 34px; }
+ .concept-page .hero-visual-wrap { height: 290px; }
+ .concept-page .hero-corner-note { display: none; }
+ .concept-page .hero-badge { display: flex; width: 47%; bottom: 95px; padding: 9px; gap: 6px; }
+ .concept-page .hero-badge-title { font-size: 10px; }
+ .concept-page .hero-badge-desc { font-size: 11px; }
+ .concept-page .hero-badge-icon .line-icon { width: 25px; height: 25px; }
+ .concept-page .hero-ai-tag { bottom: 15px; left: 5%; max-width: 90%; }
+ .concept-page .history-panel { padding: 15px; }
+ .concept-page .history-panel-title { font-size: 21px; }
+ .concept-page .flow-row { grid-template-columns: 1fr 25px 1fr; gap: 12px; }
+ .concept-page .flow-arrow { padding: 2px; }
+ .concept-page .flow-arrow .line-icon { width: 20px; }
+ .concept-page .flow-badge { font-size: 10px; }
+ .concept-page .flow-caption { font-size: 11px; }
+ .concept-page .flow-branches, .concept-page .outcome-cards { grid-column: 1 / -1; }
+ .concept-page .flow-branches { padding: 15px 0; gap: 25px; }
+ .concept-page .branch-icon { display: block; }
+ .concept-page .outcome-thumb { width: 32%; }
+ .concept-page .quote-text { font-size: 13px; text-align: center; padding: 8px; }
+ .concept-page .quote-mark { font-size: 20px; margin: 0 4px; }
+ .concept-page .obj-grid { grid-template-columns: 1fr 1fr; row-gap: 22px; }
+ .concept-page .obj-item:nth-child(2) { border: 0; }
+ .concept-page .info-panel { padding: 15px 10px; }
+ .concept-page .panel-title { margin-bottom: 15px; }
+ .concept-page .aiml-note { margin-top: 18px; }
+ .satellite-shell .footer-note { max-width: none; }
+}

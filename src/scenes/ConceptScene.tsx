@@ -1,113 +1,59 @@
-interface Props {
-  onNext: () => void
-}
+import ConceptCardArt from './ConceptCardArt'
+import LandHistoryStory, { LandPlot } from './LandHistoryStory'
+import EvidenceJourney from '../components/EvidenceJourney'
+import LineIcon from '../components/LineIcon'
+import './ConceptScene.css'
+import './ConceptRevised.css'
 
-function ConceptScene({ onNext }: Props) {
-  return (
-    <div className="scene-pad">
-      <div className="eyebrow-label">CONCEPT</div>
-      <h1 className="scene-title">Land use history defines abandonment</h1>
-
-      <div className="flow-row">
-        <div className="flow-card">
-          <div className="flow-badge">PREVIOUSLY ACTIVE</div>
-          <div className="flow-thumb">
-            <div className="flow-thumb-icon">🚜</div>
-          </div>
-          <div className="flow-caption">Land used for agriculture or other productive activities</div>
-        </div>
-
-        <div className="flow-arrow">›</div>
-
-        <div className="flow-card">
-          <div className="flow-badge">USE STOPS</div>
-          <div className="flow-thumb dim">
-            <div className="flow-thumb-icon">⏸</div>
-          </div>
-          <div className="flow-caption">No visible signs of active use detected</div>
-        </div>
-
-        <div className="flow-shuffle">🔀</div>
-
-        <div className="flow-branches">
-          <div className="branch good">
-            <span className="branch-icon">📅✓</span>
-            <div>
-              <div className="branch-title">NO RETURN FOR<br /><strong>≥5</strong> CONSECUTIVE YEARS</div>
-              <div className="branch-timeline">
-                <span>Y1</span><span>•</span><span>Y2</span><span>•</span><span>Y3</span><span>•</span><span>Y4</span><span>•</span><span>Y5</span><span className="arrow">→</span>
-              </div>
-            </div>
-          </div>
-          <div className="branch warn">
-            <span className="branch-icon">🔄</span>
-            <div>
-              <div className="branch-title">ACTIVE AGAIN<br />WITHIN 5 YEARS</div>
-              <div className="branch-timeline">
-                <span>Y1</span><span>•</span><span>Y2</span><span>•</span><span>Y3</span><span>•</span><span>RETURN</span><span className="arrow">→</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="outcome-cards">
-          <div className="outcome-card good">
-            <div className="outcome-thumb" />
-            <div className="outcome-body">
-              <div className="outcome-title">ABANDONED</div>
-              <div className="outcome-desc">No return to active use for ≥5 consecutive years</div>
-            </div>
-            <div className="outcome-icon">🌱</div>
-          </div>
-          <div className="outcome-card warn">
-            <div className="outcome-thumb" />
-            <div className="outcome-body">
-              <div className="outcome-title">NOT ABANDONED</div>
-              <div className="outcome-desc">Returned to active use within 5 years</div>
-            </div>
-            <div className="outcome-icon">🌱</div>
-          </div>
-        </div>
+const OBJECTIVES = [
+  { icon: 'pin', name: 'WHERE', desc: 'Where are the candidate areas?', answer: 'Mapped locations for review' },
+  { icon: 'calendar', name: 'WHEN', desc: 'When did active use appear to stop?', answer: 'Estimated timing of change' },
+  { icon: 'clock', name: 'HOW LONG', desc: 'How long has non-use persisted?', answer: 'Duration supported by time-series evidence' },
+  { icon: 'target', name: 'WHAT NEXT', desc: 'How can this evidence support the next decision?', answer: 'Priorities for verification and follow-up' },
+]
+const AIML_ROLE = [
+  { icon: 'chip', name: 'DETECT', desc: 'Scan large areas efficiently.' },
+  { icon: 'signal', name: 'LOOK BACK', desc: 'Use satellite time series, not a single date.' },
+  { icon: 'chart', name: 'PRIORITIZE', desc: 'Highlight areas for review.' },
+  { icon: 'search', name: 'SUPPORT ACTION', desc: 'Provide spatial evidence for follow-up.' },
+]
+function ConceptScene() {
+  return <div className="scene-pad concept-revised">
+    <section className="cr-hero" aria-labelledby="cr-title">
+      <div className="cr-copy">
+        <p className="cr-eyebrow">01 / CONCEPT &amp; OBJECTIVES</p>
+        <h1 id="cr-title">From abandoned land<br/>to <span>better decisions</span></h1>
+        <p className="cr-intro">Some land is held but left unused, while people and communities are looking for space to work and act. This mismatch raises a question: what is happening on that land, and what might it become?</p>
       </div>
-
-      <div className="bottom-row">
-        <div className="panel">
-          <div className="panel-title">OBJECTIVES</div>
-          <div className="obj-grid">
-            <div className="obj-item">
-              <div className="obj-icon">📍</div>
-              <div className="obj-name">WHERE</div>
-              <div className="obj-desc">Detect where abandonment occurs</div>
-            </div>
-            <div className="obj-item">
-              <div className="obj-icon">📅</div>
-              <div className="obj-name">WHEN</div>
-              <div className="obj-desc">Identify when use stopped</div>
-            </div>
-            <div className="obj-item">
-              <div className="obj-icon">⏱</div>
-              <div className="obj-name">HOW LONG</div>
-              <div className="obj-desc">Measure how long the land remains unused</div>
-            </div>
-            <div className="obj-item">
-              <div className="obj-icon">▦</div>
-              <div className="obj-name">WHAT TYPE</div>
-              <div className="obj-desc">Determine the type of previous land use and abandonment pattern</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="panel-arrow">›</div>
-
-        <div className="cta-block">
-          <div className="cta-graphic">⬡</div>
-          <button className="cta-link" onClick={onNext}>
-            How it works →
-          </button>
-        </div>
+      <aside className="cr-hero-aside" aria-label="Land use context">
+        <p className="cr-land-caption">LAND DATA FOR A MORE<br/><strong>SUSTAINABLE THAILAND</strong></p>
+      </aside>
+      <div className="cr-context">
+          <article><div className="cr-context-art context-unused" role="img" aria-label="Illustration of an unused agricultural plot with land ownership documents"/><div><h3>HELD, BUT UNUSED</h3><p>Land is held under title, but shows no active use.</p></div></article>
+          <article><div className="cr-context-art context-community" role="img" aria-label="Illustration of community members considering land for future activities"/><div><h3>NEEDS SPACE TO ACT</h3><p>People &amp; communities can act, but lack access to land.</p></div></article>
+          <article className="cr-gee"><div className="cr-context-art context-screening" role="img" aria-label="Illustration of satellite screening over layered land data"/><div><h3>SCREENED VIA GOOGLE EARTH ENGINE</h3><p>Satellite time series, processed on Google Earth Engine, flag candidate areas for review.</p></div></article>
       </div>
-    </div>
-  )
+    </section>
+    <section className="cr-value-story" aria-labelledby="cr-value-title">
+      <header><span className="cr-story-kicker">THE QUESTION BEHIND THE MAP</span><h2 id="cr-value-title">Unused land. Two possible stories.</h2><p>Inactivity can mean different things on the ground.</p></header>
+      <div className="cr-value-paths">
+        <article className="cr-economic"><LandPlot state="idle"/><div><span>ECONOMIC PERSPECTIVE</span><h3>Productive value may be lost</h3><p>Land no longer supports the activity it once did, while others are looking for space.</p></div></article>
+        <article className="cr-ecological"><LandPlot state="recovering" growth={4}/><div><span>ECOLOGICAL PERSPECTIVE</span><h3>New ecological value may emerge</h3><p>Vegetation and natural recovery may change the value of an inactive plot.</p></div></article>
+      </div>
+      <p className="cr-value-note">These are possibilities to investigate. Satellite evidence locates change; local review explains its meaning.</p>
+    </section>
+    <aside className="cr-story-bridge"><span className="cr-icon"><LineIcon name="search"/></span><div><span>BEFORE DECIDING WHAT COMES NEXT</span><h2>Where is it &mdash; and how do we know it is abandoned?</h2><p>Locate the land, then follow its history. A single image cannot establish persistent non-use.</p></div></aside>
+    <section className="cr-history" aria-labelledby="cr-history-title">
+      <h2 id="cr-history-title">Land use history defines abandonment</h2>
+      <LandHistoryStory/>
+      <aside className="cr-law"><LineIcon name="shield"/><div><h3>Screening threshold and legal context <a href="https://deka.in.th/laws/ldc/6" target="_blank" rel="noreferrer">Land Code, Section 6 &nearr;</a></h3><p>This project uses &ge;5 years of non-use for screening. Thai land law distinguishes title deeds (&gt;10 years) and certificates of utilization (&gt;5 years). Screening does not determine legal status or replace the required legal process.</p></div></aside>
+    </section>
+    <EvidenceJourney />
+    <div className="cr-statement">Detect first. Understand next. Decide better.</div>
+    <section className="cr-panels" aria-label="Objectives and role of artificial intelligence">
+      <article className="cr-panel"><h2><LineIcon name="target"/>OBJECTIVES</h2><p className="cr-panel-intro">Four questions turn an initial observation into evidence for the next step.</p><div className="cr-illustrated-cards">{OBJECTIVES.map((o,index)=><article className="cr-illustrated-card" key={o.name}><div className="cr-card-picture"><ConceptCardArt kind={o.icon}/></div><div className="cr-card-copy cr-question-copy"><h3><span>0{index+1}</span>{o.name}</h3><p>{o.desc}</p><small>{o.answer}</small></div></article>)}</div><p className="cr-note"><LineIcon name="clock"/>Each answer feeds one field in the screening output; verification adds the local context.</p></article>
+      <article className="cr-panel"><h2><LineIcon name="chip"/>ROLE OF AI/ML</h2><p className="cr-panel-intro cr-teal">Built on open satellite data, processed through Google Earth Engine.</p><div className="cr-illustrated-cards">{AIML_ROLE.map(o=><article className="cr-illustrated-card" key={o.name}><div className="cr-card-picture"><ConceptCardArt kind={o.icon}/></div><div className="cr-card-copy"><h3>{o.name}</h3><p>{o.desc}</p></div></article>)}</div><div className="cr-notes"><p className="cr-note"><LineIcon name="shield"/>AI/ML supports initial screening and prioritization, not final decision-making.</p><p className="cr-note"><LineIcon name="leaf"/>Inactive land may also reflect ecological recovery. Local review helps distinguish these possibilities.</p></div></article>
+    </section>
+  </div>
 }
-
 export default ConceptScene

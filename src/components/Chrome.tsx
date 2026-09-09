@@ -1,3 +1,5 @@
+import LineIcon from './LineIcon'
+
 interface ChromeProps {
   step: number
   onStepChange: (step: number) => void
@@ -21,10 +23,10 @@ function topTabActive(step: number, tabStep: number) {
 
 function Chrome({ step, onStepChange, onBack, footerNote, children }: ChromeProps) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div className={`app-shell satellite-shell ${step === 1 ? 'concept-shell' : step === 2 ? 'method-shell' : 'explore-shell'}`} style={{ display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden' }}>
       <header className="app-header">
         <div className="brand-block">
-          <div className="brand-logo">◈</div>
+          <div className="brand-logo"><LineIcon name="layers" /></div>
           <div>
             <div className="brand-title">
               ABANDONED LAND DETECTION
@@ -32,20 +34,21 @@ function Chrome({ step, onStepChange, onBack, footerNote, children }: ChromeProp
             <div className="brand-subtitle">Monitoring neglected areas for sustainable Thailand</div>
           </div>
         </div>
-        <nav className="top-tabs">
+        <nav className="top-tabs" aria-label="Main navigation">
           {TOP_TABS.map((t) => (
             <button
               key={t.label}
               className={`top-tab ${topTabActive(step, t.step) ? 'active' : ''}`}
+              aria-current={topTabActive(step, t.step) ? "page" : undefined}
               onClick={() => onStepChange(t.step)}
             >
-              <span className="top-tab-icon">{t.icon}</span> {t.label}
+              <span className="top-tab-icon"><LineIcon name={t.step === 1 ? "bulb" : t.step === 2 ? "shield" : "layers"} /></span> {t.label}
             </button>
           ))}
         </nav>
       </header>
 
-      <main style={{ flex: 1 }}>{children}</main>
+      <main style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>{children}</main>
 
       <footer className="app-footer">
         <span className="footer-brand">BY PLOT {'{A2B}'}</span>
@@ -59,7 +62,7 @@ function Chrome({ step, onStepChange, onBack, footerNote, children }: ChromeProp
           </button>
           <div className="step-dots">
             {[1, 2, 3].map((s) => (
-              <button key={s} className={`step-dot ${step === s ? 'active' : ''}`} onClick={() => onStepChange(s)}>
+              <button key={s} aria-label={TOP_TABS[s - 1].label} aria-current={step === s ? 'page' : undefined} className={`step-dot ${step === s ? 'active' : ''}`} onClick={() => onStepChange(s)}>
                 {String(s).padStart(2, '0')}
               </button>
             ))}
@@ -72,7 +75,7 @@ function Chrome({ step, onStepChange, onBack, footerNote, children }: ChromeProp
             Next ›
           </button>
         </div>
-        <span className="footer-note">{footerNote ?? ''}</span>
+        <span className="footer-note">{footerNote || 'TURN SATELLITE DATA INTO A MORE SUSTAINABLE THAILAND'}</span>
       </footer>
     </div>
   )

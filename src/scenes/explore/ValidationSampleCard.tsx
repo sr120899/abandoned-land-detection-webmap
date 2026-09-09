@@ -9,6 +9,7 @@ import {
   Tooltip,
   Legend,
   type ChartOptions,
+  type ChartDataset,
 } from 'chart.js'
 import annotationPlugin from 'chartjs-plugin-annotation'
 import { parseCSV, num } from '../../utils/csv'
@@ -57,20 +58,6 @@ const TYPE_LABEL: Record<'C1' | 'C2', string> = {
   C1: 'C1 (พื้นที่ไร่ร้าง / abandoned field crops)',
   C2: 'C2 (ไม้พุ่มขึ้นปกคลุม / shrub encroachment)',
 }
-
-// Dataset-level separation scores (how well each feature tells "abandoned"
-// apart from "not abandoned" across the whole training set) — NOT per-point
-// values and NOT Feature Importance. Labels spell out plain-English meaning
-// plus the underlying GEE field name so it stays traceable.
-const FEATURE_SEPARATION = [
-  { label: 'Texture Roughness (GLCM Entropy)', field: 'tex_ent', value: 5.263, stars: '★★★' },
-  { label: 'NBR Baseline Level (5yr)', field: 'nbr_preval_5yr', value: 1.323, stars: '★★' },
-  { label: 'Vegetation Trend (EVI Slope, 5yr)', field: 'evi_slope', value: 1.082, stars: '★★' },
-  { label: 'NBR Change Size (5yr)', field: 'nbr_mag_5yr', value: 0.879, stars: '★' },
-  { label: 'NBR Change Speed (5yr)', field: 'nbr_rate_5yr', value: 0.757, stars: '★' },
-  { label: 'NDVI Baseline Level', field: 'lt_preval', value: 0.361, stars: '' },
-]
-const MAX_SEP = 5.263
 
 const PHOTO_YEARS: Record<string, string[]> = {
   point_5: ['2019', '2021', '2022', '2023', '2024'],
@@ -142,8 +129,9 @@ function ValidationSampleCard({ caseName }: Props) {
   }, [lightboxIndex, photoYears.length])
 
   useEffect(() => {
-    fetch(`${BASE}data/Case_Studies_Indices.csv`)
-      .then((r) => r.text())
+    const controller = new AbortController()
+    fetch(`${BASE}data/Case_Studies_Indices.csv`, { signal: controller.signal })
+      .then((r) => { if (!r.ok) throw new Error('Time series unavailable'); return r.text() })
       .then((text) => {
         const parsed = parseCSV(text)
           .filter((r) => r.case_name === caseName)
@@ -156,16 +144,13 @@ function ValidationSampleCard({ caseName }: Props) {
             sar: r.sar === '' ? null : num(r.sar),
           }))
           .sort((a, b) => a.year - b.year)
-        setRows(parsed)
+        if (!controller.signal.aborted) setRows(parsed)
       })
+      .catch(() => { if (!controller.signal.aborted) setRows([]) })
+    return () => controller.abort()
   }, [caseName])
 
-  useEffect(() => {
-    setSelectedIndices(['nbr'])
-    setLightboxIndex(null)
-  }, [caseName])
-
-  if (!result) return <div className="stat-sub">ไม่มีข้อมูล Model Result สำหรับ {caseLabel(caseName)}</div>
+if (!result) return <div className="stat-sub">ไม่มีข้อมูล Model Result สำหรับ {caseLabel(caseName)}</div>
 
   function toggleIndex(key: IndexKey) {
     setSelectedIndices((prev) => {
@@ -176,114 +161,28 @@ function ValidationSampleCard({ caseName }: Props) {
     })
   }
 
-  const CHART_TITLE: Record<IndexKey, string> = {
-    nbr: 'NBR Fitted Time Series (หลักฐานหลัก) · 2000–2025',
-    ndvi: 'NDVI (raw) · 2000–2025',
-    sar: 'SAR VH (dB) · 2015–2025',
+  const datasets: ChartDataset<'line'>[] = []
+  const addSeries = (label: string, field: 'nbr_observed' | 'nbr_fitted' | 'ndvi' | 'sar', color: string, axis = 'index') => {
+    datasets.push({ label, data: rows.map(r => field === 'sar' && r.year < 2015 ? null : r[field]), borderColor: color, backgroundColor: color, yAxisID: axis, pointRadius: field === 'nbr_fitted' ? 0 : 2, borderWidth: 2, tension: 0, spanGaps: false })
   }
-
-  function buildChart(index: IndexKey) {
-    // SAR only has coverage from 2015 onward — drop the earlier empty years so
-    // the axis auto-scales to the data that actually exists for that index.
-    const visibleRows = index === 'sar' ? rows.filter((r) => r.year >= 2015) : rows
-    const years = visibleRows.map((r) => r.year)
-
-    const data =
-      index === 'nbr'
-        ? {
-            labels: years,
-            datasets: [
-              {
-                label: 'Observed NBR',
-                data: visibleRows.map((r) => r.nbr_observed),
-                borderColor: '#93a1c2',
-                backgroundColor: '#93a1c2',
-                pointRadius: 3,
-                tension: 0,
-              },
-              {
-                label: 'Fitted NBR',
-                data: visibleRows.map((r) => r.nbr_fitted),
-                borderColor: '#2dd4bf',
-                backgroundColor: 'transparent',
-                pointRadius: 0,
-                borderWidth: 2,
-                tension: 0.15,
-              },
-            ],
-          }
-        : index === 'ndvi'
-          ? {
-              labels: years,
-              datasets: [
-                {
-                  label: 'NDVI (raw)',
-                  data: visibleRows.map((r) => r.ndvi),
-                  borderColor: '#2dd4bf',
-                  backgroundColor: 'transparent',
-                  pointRadius: 2,
-                  tension: 0.2,
-                },
-              ],
-            }
-          : {
-              labels: years,
-              datasets: [
-                {
-                  label: 'SAR VH (dB)',
-                  data: visibleRows.map((r) => r.sar),
-                  borderColor: '#fbbf24',
-                  backgroundColor: 'transparent',
-                  pointRadius: 2,
-                  tension: 0.2,
-                },
-              ],
-            }
-
-    let annotations: object = {}
-    if (index === 'nbr') {
-      const disturbanceRow = rows.find((r) => r.year === result.nbrChangeYear)
-      const disturbanceBase = disturbanceRow?.nbr_observed ?? disturbanceRow?.nbr_fitted ?? 0
-      const nbrValues = rows.flatMap((r) => [r.nbr_observed, r.nbr_fitted]).filter((v): v is number => v !== null)
-      const nbrMax = nbrValues.length ? Math.max(...nbrValues) : 1
-      annotations = {
-        disturbanceArrow: {
-          type: 'line',
-          xMin: String(result.nbrChangeYear),
-          xMax: String(result.nbrChangeYear),
-          yMin: disturbanceBase,
-          yMax: nbrMax + (nbrMax - disturbanceBase) * 0.6 + 0.15,
-          borderColor: '#f87171',
-          borderWidth: 2,
-          arrowHeads: { end: { display: true, width: 7, length: 9 } },
-        },
-        disturbanceLabel: {
-          type: 'label',
-          xValue: String(result.nbrChangeYear),
-          yValue: nbrMax + (nbrMax - disturbanceBase) * 0.6 + 0.2,
-          content: [`Disturbance (${result.nbrChangeYear})`],
-          color: '#f87171',
-          font: { size: 11, weight: 'bold' },
-          position: { x: 'start', y: 'center' },
-          xAdjust: 4,
-        },
-      }
-    }
-
-    const options: ChartOptions<'line'> = {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { color: '#93a1c2', boxWidth: 14 } },
-        annotation: { annotations },
-      },
-      scales: {
-        x: { ticks: { color: '#93a1c2' }, grid: { color: '#24314f' } },
-        y: { ticks: { color: '#93a1c2' }, grid: { color: '#24314f' } },
-      },
-    }
-
-    return { data, options }
+  if (selectedIndices.includes('nbr')) { addSeries('NBR observed', 'nbr_observed', '#91a7c6'); addSeries('NBR fitted', 'nbr_fitted', '#28e7dc') }
+  if (selectedIndices.includes('ndvi')) addSeries('NDVI', 'ndvi', '#a3e635')
+  if (selectedIndices.includes('sar')) addSeries('SAR VH (dB)', 'sar', '#fbbf24', 'sar')
+  const chartData = { labels: rows.map(r => String(r.year)), datasets }
+  const chartOptions: ChartOptions<'line'> = {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { labels: { color: '#b8d5df', boxWidth: 12 }, onClick: () => {} },
+      annotation: { annotations: selectedIndices.includes('nbr') && rows.some(r => r.year === result.nbrChangeYear) ? {
+        change: { type: 'line', xMin: String(result.nbrChangeYear), xMax: String(result.nbrChangeYear), borderColor: '#fc9292', borderWidth: 1.5, borderDash: [5, 4], label: { display: true, content: 'NBR change: ' + result.nbrChangeYear, position: 'start', color: '#ffd8d8', backgroundColor: '#3c2538', font: { size: 10 } } },
+      } : {} },
+    },
+    scales: {
+      x: { ticks: { color: '#9cbfce', maxTicksLimit: 14, maxRotation: 0 }, grid: { color: '#1a414f' }, title: { display: true, text: 'Year', color: '#9cbfce' } },
+      index: { display: selectedIndices.some(k => k !== 'sar'), position: 'left', title: { display: true, text: 'NBR / NDVI', color: '#9cbfce' }, ticks: { color: '#9cbfce' }, grid: { color: '#1a414f' } },
+      sar: { display: selectedIndices.includes('sar'), position: 'right', title: { display: true, text: 'SAR VH (dB)', color: '#fbbf24' }, ticks: { color: '#fbbf24' }, grid: { drawOnChartArea: false } },
+    },
   }
 
   const photoSrc = (year: string) => `${BASE}photos/${caseName}/abandoned_land_${caseName}_${year}.png`
@@ -291,10 +190,9 @@ function ValidationSampleCard({ caseName }: Props) {
   return (
     <div className="vsc">
       <div className="vsc-header">
-        <div className="vsc-badge">05</div>
+
         <div>
-          <div className="vsc-title-th">ตัวอย่างพื้นที่ตรวจสอบ: {caseLabel(caseName)} ({result.amphoe})</div>
-          <div className="vsc-title-en">VALIDATION SAMPLE: {caseLabel(caseName).toUpperCase()} ({result.amphoe.toUpperCase()})</div>
+          <h2 className="vsc-title-th">{caseLabel(caseName)} &middot; {result.amphoe}</h2>
         </div>
       </div>
 
@@ -316,7 +214,7 @@ function ValidationSampleCard({ caseName }: Props) {
             <div className="vsc-row"><span>Duration</span><span>{result.duration} years</span></div>
             <div className="vsc-row"><span>Type</span><span>{TYPE_LABEL[result.type]}</span></div>
             <p className="stat-sub" style={{ marginTop: 6 }}>
-              NBR-based change year (nbr_yod) = {result.nbrChangeYear} — a separate diagnostic from the official YOD above; the two can disagree (see Data Notes).
+              NBR-based change year (nbr_yod) = {result.nbrChangeYear} — a separate diagnostic from the official YOD above; the two can disagree.
             </p>
           </div>
 
@@ -345,12 +243,17 @@ function ValidationSampleCard({ caseName }: Props) {
             )}
           </div>
 
+        </div>
+
+        <div className="vsc-right-col">
           <div className="chart-card-header">
             <div className="chart-title">Time series evidence</div>
             <div className="pill-tabs small multi">
               {INDEX_OPTIONS.map((opt) => (
                 <button
                   key={opt.key}
+                  type="button"
+                  aria-pressed={selectedIndices.includes(opt.key)}
                   className={selectedIndices.includes(opt.key) ? 'active' : ''}
                   onClick={() => toggleIndex(opt.key)}
                 >
@@ -359,71 +262,21 @@ function ValidationSampleCard({ caseName }: Props) {
               ))}
             </div>
           </div>
-          <div className={`chart-grid ${selectedIndices.length > 1 ? 'multi' : ''}`}>
-            {INDEX_OPTIONS.filter((opt) => selectedIndices.includes(opt.key)).map((opt) => {
-              const { data, options } = buildChart(opt.key)
-              return (
-                <div className="chart-card" key={opt.key}>
-                  <div className="chart-title">{CHART_TITLE[opt.key]}</div>
-                  <div className="chart-canvas-wrap">
-                    <Line data={data} options={options} />
-                  </div>
-                </div>
-              )
-            })}
+          <div className="chart-card">
+            <div className="chart-canvas-wrap unified-case-chart"><Line data={chartData} options={chartOptions} /></div>
+            <p className="stat-sub">Select one or more series. NBR / NDVI use the left axis; SAR VH uses the right axis (dB). Gaps indicate missing observations.</p>
           </div>
-        </div>
 
-        <div className="vsc-right-col">
-          <div className="panel-title">Feature Evidence (Separation Score)</div>
-          <p className="stat-sub">ระดับชุดข้อมูล ไม่ใช่ค่าของจุดนี้โดยเฉพาะ และไม่ใช่ Feature Importance</p>
-          {FEATURE_SEPARATION.map((f) => (
-            <div className="sep-row" key={f.label}>
-              <span className="sep-label">{f.label}</span>
-              <div className="sep-track"><div style={{ width: `${(f.value / MAX_SEP) * 100}%` }} /></div>
-              <span className="sep-value">{f.value.toFixed(3)} {f.stars}</span>
-            </div>
-          ))}
 
-          <div className="key-insight-card">
-            <div className="panel-title">💡 Key Insight</div>
-            <p>
-              Texture และ NBR time-series ให้สัญญาณที่แยกกลุ่มได้เด่นกว่า NDVI ซึ่งใช้เป็นข้อมูลประกอบ — สำหรับ {caseLabel(caseName)} เส้น fitted
-              เปลี่ยนช่วงชัดเจนที่ปี {result.nbrChangeYear} แต่ยังต้องตรวจประวัติการใช้ประโยชน์ร่วมด้วยก่อนสรุปว่าเป็นพื้นที่รกร้างจริง
-            </p>
-          </div>
         </div>
       </div>
-
-      {lightboxIndex !== null && (
-        <div className="photo-lightbox" onClick={() => setLightboxIndex(null)}>
-          <button type="button" className="close-btn photo-lightbox-close" onClick={() => setLightboxIndex(null)}>
-            ✕ Close
-          </button>
-          <button
-            type="button"
-            className="photo-lightbox-nav prev"
-            disabled={lightboxIndex === 0}
-            onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i === null ? i : Math.max(i - 1, 0))) }}
-          >
-            ‹
-          </button>
-          <img
-            src={photoSrc(photoYears[lightboxIndex])}
-            alt={`${caseLabel(caseName)} ${photoYears[lightboxIndex]}`}
-            onClick={(e) => e.stopPropagation()}
-          />
-          <button
-            type="button"
-            className="photo-lightbox-nav next"
-            disabled={lightboxIndex === photoYears.length - 1}
-            onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i === null ? i : Math.min(i + 1, photoYears.length - 1))) }}
-          >
-            ›
-          </button>
-          <div className="photo-lightbox-caption">{caseLabel(caseName)} · {photoYears[lightboxIndex]}</div>
-        </div>
-      )}
+      {lightboxIndex !== null && <div className="photo-lightbox" role="dialog" aria-modal="true" aria-label="Satellite image" onClick={() => setLightboxIndex(null)}>
+        <button type="button" className="close-btn photo-lightbox-close" onClick={() => setLightboxIndex(null)}>Close</button>
+        <button type="button" className="photo-lightbox-nav prev" aria-label="Previous image" disabled={lightboxIndex === 0} onClick={e => { e.stopPropagation(); setLightboxIndex(Math.max(0, lightboxIndex - 1)) }}>&lsaquo;</button>
+        <img src={photoSrc(photoYears[lightboxIndex])} alt={caseLabel(caseName) + ' ' + photoYears[lightboxIndex]} onClick={e => e.stopPropagation()} />
+        <button type="button" className="photo-lightbox-nav next" aria-label="Next image" disabled={lightboxIndex === photoYears.length - 1} onClick={e => { e.stopPropagation(); setLightboxIndex(Math.min(photoYears.length - 1, lightboxIndex + 1)) }}>&rsaquo;</button>
+        <div className="photo-lightbox-caption">{caseLabel(caseName)} &middot; {photoYears[lightboxIndex]}</div>
+      </div>}
     </div>
   )
 }

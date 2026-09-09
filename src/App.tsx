@@ -5,6 +5,8 @@ import ConceptScene from './scenes/ConceptScene'
 import MethodScene from './scenes/MethodScene'
 import ExploreScene from './scenes/explore/ExploreScene'
 import type { ExploreSceneHandle } from './scenes/explore/ExploreScene'
+import './SatelliteTheme.css'
+import './NarrativePages.css'
 
 function App() {
   const [step, setStep] = useState(1)
@@ -22,7 +24,7 @@ function App() {
       onBack={handleBack}
       footerNote={step >= 3 ? 'Nominal area estimate (30m). Model classification: C1 + C2.' : ''}
     >
-      {step === 1 && <ConceptScene onNext={() => setStep(2)} />}
+      {step === 1 && <ConceptScene />}
       {step === 2 && <MethodScene />}
       {step === 3 && <ExploreScene ref={exploreRef} />}
     </Chrome>

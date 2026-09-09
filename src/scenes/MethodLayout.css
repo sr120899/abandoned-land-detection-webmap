@@ -1,0 +1,147 @@
+﻿/* Compact logic rail alongside the horizontal processing explorer. */
+.method-v2 { padding: 16px 22px 18px; }
+.method-v2 section { max-width: 1600px; padding: 18px 20px; margin-bottom: 14px; }
+.method-v2 .method-hero { min-height: 270px; padding: 0; grid-template-columns: 42% 58%; }
+.method-v2 .method-hero-copy { padding: 28px 0 28px 28px; }
+.method-v2 .method-hero-copy > span { display: none; }
+.method-v2 .method-hero h1 { font-size: clamp(28px, 2.65vw, 42px); margin-top: 6px; }
+.method-v2 .method-hero-art { padding: 8px 18px 72px; }
+.method-v2 .method-hero-art img { width: 100%; max-height: 290px; object-fit: contain; }
+.method-v2 .method-glance { padding: 18px 14px; }
+.method-v2 .method-glance > header { padding: 0 6px; margin-bottom: 16px; }
+.method-v2 .method-linked-layout { display: grid; grid-template-columns: 135px 42px minmax(0, 1fr); gap: 12px; align-items: stretch; }
+.method-v2 .method-logic-column { min-width: 0; }
+.method-v2 .logic-side { padding: 0; border: 0; background: none; }
+.method-v2 .logic-side h3 { font-size: 10px; text-align: center; min-height: 25px; margin: 0 0 8px; }
+.method-v2 .logic-row.logic-vertical { grid-template-columns: minmax(0, 1fr); gap: 15px; }
+.method-v2 .logic-vertical article { min-height: 105px; padding: 12px 7px; }
+.method-v2 .logic-vertical article > svg { width: 30px; height: 30px; margin-bottom: 10px; }
+.method-v2 .logic-vertical article > b { font-size: 10px; }
+.method-v2 .logic-vertical article > small { font-size: 9px; margin-top: 5px; }
+.method-v2 .logic-row.logic-vertical .logic-arrow { display: block; right: -12px; top: 44%; font-size: 14px; color: var(--m-cyan); }
+.method-v2 .method-flow-rail { display: flex; flex-direction: column; align-items: center; justify-content: space-around; position: relative; padding: 28px 0 0; }
+.method-v2 .method-flow-rail::before { content: ''; position: absolute; top: -16px; bottom: -32px; left: 50%; border-left: 1px dashed #2bdddc; filter: drop-shadow(0 0 4px #20efee); }
+.method-v2 .method-flow-rail > span { position: relative; display: grid; place-items: center; width: 32px; height: 32px; background: #002335; border: 1px solid #41cde4; border-radius: 50%; font: 11px ui-monospace, monospace; color: #d1eff5; box-shadow: 0 0 10px #21d9f233; }
+.method-v2 .method-flow-rail > span.active { border-color: var(--m-cyan); color: var(--m-cyan); box-shadow: 0 0 12px #24eeee77; }
+.method-v2 .method-flow-rail > span.active::after { content: ''; position: absolute; left: 31px; width: 16px; border-top: 1px solid var(--m-cyan); }
+.method-v2 .method-workflow-explorer { min-width: 0; align-self: start; padding: 18px; border: 1px solid #19596a; border-radius: 12px; background: linear-gradient(120deg, #002530aa, #001a27); }
+.method-v2 .method-workflow-explorer .visual-workflow-heading { gap: 10px; margin-bottom: 18px; }
+.method-v2 .visual-workflow-heading h3 { font-size: 14px; color: #ebf9ff; }
+.method-v2 .visual-workflow-heading > span { font-size: 8px; letter-spacing: .14em; }
+.method-v2 .workflow-stage-tabs { gap: 18px; }
+.method-v2 .workflow-stage-tabs button { grid-template-columns: 27px 25px minmax(0, 1fr); gap: 7px; padding: 15px 9px; min-height: 0; }
+.method-v2 .workflow-stage-tabs button:not(:last-child)::after { right: -19px; font-size: 21px; }
+.method-v2 .workflow-stage-tabs .stage-number { width: 26px; height: 30px; font-size: 10px; border-radius: 6px; }
+.method-v2 .workflow-stage-tabs button > svg { display: block; width: 24px; height: 24px; }
+.method-v2 .workflow-stage-tabs b { font-size: 11px; padding-right: 0; }
+.method-v2 .method-process-expanded[hidden] { display: none; }
+.method-v2 .workflow-detail-panel { padding: 17px; margin-top: 20px; gap: 18px; grid-template-columns: minmax(0, 2.4fr) minmax(210px, 1fr); }
+.method-v2 .workflow-detail-main h3 { font-size: 18px; }
+.method-v2 .workflow-detail-main header p { font-size: 12px; }
+.method-v2 .visual-process-cards { gap: 22px; }
+.method-v2 .process-illustration > span { right: -23px; font-size: 24px; }
+.method-v2 .visual-process-cards h4 { font-size: 10px; }
+.method-v2 .process-labels span { font-size: 10px; padding: 7px 4px; }
+.method-v2 .workflow-summary { display: block; padding: 0 0 0 16px; border-top: 0; border-left: 1px solid #197e8b; }
+.method-v2 .workflow-summary > header { margin-bottom: 14px; gap: 10px; }
+.method-v2 .workflow-summary > header svg { width: 30px; height: 30px; }
+.method-v2 .workflow-summary h3 { font-size: 12px; }
+.method-v2 .workflow-summary header p { font-size: 10px; }
+.method-v2 .workflow-summary article { padding: 12px; margin-bottom: 8px; flex-direction: row; gap: 12px; align-items: center; }
+.method-v2 .workflow-summary article svg { width: 26px; height: 26px; }
+.method-v2 .workflow-summary article b { font-size: 11px; }
+.method-v2 .workflow-summary article p { font-size: 10px; }
+.method-v2 .workflow-insight { grid-template-columns: minmax(0, 2.4fr) minmax(210px, 1fr); gap: 18px; }
+.method-v2 .workflow-insight p { font-size: 11px; }
+.method-v2 .workflow-insight > small { font-size: 10px; }
+.method-v2 .method-process-prompt { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 24px; margin-top: 20px; border: 1px dashed #205566; border-radius: 10px; }
+.method-v2 .method-process-prompt > svg { width: 28px; color: #39dfda; }
+.method-v2 .method-process-prompt p { font-size: 12px; }
+.method-v2 .outputs-with-map { display: block; width: 100%; max-width: none; }
+.method-v2 .method-output-grid .method-visual { max-width: 80px; }
+.method-v2 .method-output-section > header { margin-bottom: 9px; }
+.method-v2 .evaluation-with-seal { grid-template-columns: minmax(0, 1fr) 12%; gap: 20px; }
+.method-v2 .evaluation-content { grid-template-columns: minmax(0, 1fr) 42%; }
+@media (max-width: 1250px) {
+  .method-v2 .method-linked-layout { grid-template-columns: 110px 32px minmax(0, 1fr); gap: 10px; }
+  .method-v2 .workflow-detail-panel { grid-template-columns: minmax(0, 1fr); }
+  .method-v2 .workflow-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; border-left: 0; border-top: 1px solid #197e8b; padding: 15px 0 0; }
+  .method-v2 .workflow-summary > header { grid-column: 1 / -1; }
+  .method-v2 .workflow-summary article { margin: 0; flex-direction: column; align-items: start; }
+  .method-v2 .workflow-stage-tabs button { grid-template-columns: 25px minmax(0, 1fr); }
+  .method-v2 .workflow-stage-tabs button > svg { display: none; }
+}
+@media (max-width: 900px) {
+  .method-v2 .workflow-stage-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .method-v2 .workflow-stage-tabs button:not(:last-child)::after { display: none; }
+  .method-v2 .workflow-insight { grid-template-columns: 1fr; }
+  .method-v2 .workflow-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .method-v2 .visual-process-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .method-v2 .visual-process-cards article:nth-child(2) .process-illustration > span { display: none; }
+  .method-v2 .outputs-with-map { max-width: none; }
+  .method-v2 .evaluation-with-seal { grid-template-columns: 1fr; }
+}
+@media (max-width: 650px) {
+  .method-v2 { padding: 12px; }
+  .method-v2 section { padding: 15px; }
+  .method-v2 .method-hero { display: block; padding: 0; }
+  .method-v2 .method-hero-copy { padding: 24px 20px 0; }
+  .method-v2 .method-hero-art { padding: 0 12px 8px; }
+  .method-v2 .method-hero-art img { max-height: 250px; }
+  .method-v2 .method-linked-layout { grid-template-columns: minmax(0, 1fr); }
+  .method-v2 .method-flow-rail { display: none; }
+  .method-v2 .logic-row.logic-vertical { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .method-v2 .logic-row.logic-vertical .logic-arrow { display: none; }
+  .method-v2 .method-workflow-explorer { padding: 12px; margin-top: 8px; }
+  .method-v2 .workflow-detail-panel { padding: 12px; }
+  .method-v2 .workflow-detail-main > header { gap: 10px; }
+  .method-v2 .workflow-detail-main h3 { font-size: 15px; }
+  .method-v2 .method-process-prompt { padding: 15px; }
+}
+@media (max-width: 370px) {
+  .method-v2 .evaluation-content { grid-template-columns: 1fr; }
+}
+
+/* Evaluation belongs to the expanded validation stage. */
+.method-v2 .stage-evaluation { margin: 20px 0 0; padding: 18px; }
+@media (max-width: 1100px) {
+  .method-v2 .stage-evaluation .evaluation-with-seal { grid-template-columns: minmax(0, 1fr); }
+  .method-v2 .stage-evaluation .validation-seal { display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .method-v2 .stage-evaluation .validation-seal .method-visual { width: 85px; }
+}
+@media (max-width: 900px) {
+  .method-v2 .stage-evaluation .evaluation-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Both navigation surfaces select the same processing stage. */
+.method-v2 .logic-vertical > button { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 105px; padding: 12px 7px; border: 1px solid #125264; border-radius: 6px; background: linear-gradient(130deg, #04323e, #00202c); text-align: center; }
+.method-v2 .logic-vertical > button > svg { width: 30px; height: 30px; color: #65f3ee; margin-bottom: 10px; }
+.method-v2 .logic-vertical > button b { font-size: 10px; }
+.method-v2 .logic-vertical > button small { font-size: 9px; margin-top: 5px; color: #a3cad9; }
+.method-v2 .logic-vertical > button:hover, .method-v2 .logic-vertical > button.linked { border-color: #35e2d7; background: #063a43; box-shadow: 0 0 13px #28efdd23; }
+.method-v2 .logic-stage-label { font: 8px ui-monospace, monospace; color: #63cbd2; margin-top: 7px; }
+.method-v2 .method-connection { margin-top: 16px; padding: 12px 14px; border-left: 2px solid #46e6d9; background: #05313b; border-radius: 0 8px 8px 0; font-size: 12px; }
+.method-v2 .method-connection b { display: block; color: #8bf0e6; margin-bottom: 4px; }
+.method-v2 .method-connection span { color: #a8cbd9; }
+
+/* Full-width terrain background replaces the separate satellite illustration. */
+.method-v2 .method-hero {
+  display: block;
+  min-height: 320px;
+  background:
+    linear-gradient(90deg, #001622ed 0%, #001e29c9 42%, #001e298c 72%, #001622a6 100%),
+    linear-gradient(180deg, #00162270, #00162245),
+    url('../assets/concept-landscape.png') center 62% / cover;
+}
+.method-v2 .method-hero > .method-contours { z-index: 0; opacity: .25; color: #1a8097; }
+.method-v2 .method-hero-copy { position: relative; width: min(62%, 740px); padding: 32px 34px 92px; }
+.method-v2 .method-hero-copy p { max-width: 580px; }
+.method-v2 .method-hero .method-stats { z-index: 1; background: #001d2be6; }
+@media (max-width: 900px) {
+  .method-v2 .method-hero-copy { width: 78%; }
+}
+@media (max-width: 650px) {
+  .method-v2 .method-hero { min-height: 0; background-position: center, center, 58% center; }
+  .method-v2 .method-hero-copy { width: 100%; padding: 26px 22px 24px; }
+  .method-v2 .method-hero .method-stats { position: relative; inset: auto; margin: 0 12px 12px; }
+}

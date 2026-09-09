@@ -1,3 +1,5 @@
+import './ExploreVisual.css'
+import LineIcon from '../../components/LineIcon'
 import { Fragment, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { Doughnut, Bar } from 'react-chartjs-2'
@@ -14,16 +16,11 @@ import { useBoundaryData, aggregate, topProvinces, REGION_NAMES } from '../../ho
 import type { AmphoeFeature } from '../../hooks/useBoundaryData'
 import ExploreMap from './ExploreMap'
 import EvidenceSheet from './EvidenceSheet'
-import { caseLabel } from '../../utils/caseLabels'
 import { BIV_COLORS, bivClassId } from '../../utils/bivariateColors'
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend)
 
 const BASE = import.meta.env.BASE_URL
-
-function pxRai(px: number, rai: number): string {
-  return `${px.toLocaleString()} px (≈${rai.toLocaleString(undefined, { maximumFractionDigits: 2 })} rai)`
-}
 
 function TypeDoughnut({ pxType1, pxType2, pct1, pct2 }: { pxType1: number; pxType2: number; pct1: number; pct2: number }) {
   const data = {
@@ -32,7 +29,7 @@ function TypeDoughnut({ pxType1, pxType2, pct1, pct2 }: { pxType1: number; pxTyp
       {
         data: [pxType1, pxType2],
         backgroundColor: ['#a3e635', '#38bdf8'],
-        borderColor: '#0b1220',
+        borderColor: '#051e2b',
         borderWidth: 2,
       },
     ],
@@ -101,8 +98,8 @@ function RankedBar({ data, hovered, onHover, onSelect }: RankedBarProps) {
       },
     },
     scales: {
-      x: { ticks: { color: '#93a1c2', font: { size: 9.5 } }, grid: { color: '#1c2740' } },
-      y: { ticks: { color: '#93a1c2', font: { size: 10.5 } }, grid: { display: false } },
+      x: { ticks: { color: '#acc1cf', font: { size: 9.5 } }, grid: { color: '#1b4657' } },
+      y: { ticks: { color: '#acc1cf', font: { size: 10.5 } }, grid: { display: false } },
     },
   }
   return (
@@ -132,7 +129,7 @@ const DASHBOARD_MAX = 960
 // supporting view here, the numbers are the point.
 function defaultDashboardWidth(): number {
   if (typeof window === 'undefined') return 620
-  return Math.round(Math.min(DASHBOARD_MAX, Math.max(620, window.innerWidth * 0.56)))
+  return Math.round(Math.min(DASHBOARD_MAX, Math.max(420, window.innerWidth * 0.44)))
 }
 
 const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props, ref) {
@@ -140,11 +137,14 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
   const [region, setRegion] = useState<string>('')
   const [province, setProvince] = useState<string>('')
   const [district, setDistrict] = useState<string>('')
-  const [layer, setLayer] = useState<'classes' | 'analysis'>('classes')
-  const [bivariate, setBivariate] = useState<BivariateRow[]>([])
+  const [layer, setLayer] = useState<'classes' | 'analysis' | 'abandoned'>('abandoned')
+  const [bivariateResult, setBivariate] = useState<{ key: string; rows: BivariateRow[] }>({ key: '', rows: [] })
+  const bivariateKey = `${region}/${province}/${district}`
+  const bivariate = useMemo(() => bivariateResult.key === bivariateKey ? bivariateResult.rows : [], [bivariateResult, bivariateKey])
   const [caseFeatures, setCaseFeatures] = useState<GeoJSON.Feature[]>([])
   const [selectedCase, setSelectedCase] = useState<string>('point_4')
   const [evidenceOpen, setEvidenceOpen] = useState(false)
+  const [showClusters, setShowClusters] = useState(true)
   const [showBoundaryLines, setShowBoundaryLines] = useState(true)
   const [showPixelRaster, setShowPixelRaster] = useState(true)
   const [hoveredProvince, setHoveredProvince] = useState('')
@@ -182,6 +182,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
   // Probability × Duration breakdown for whichever boundary is currently selected —
   // per-amphoe if drilled to a district, per-province, or the Central-wide default.
   useEffect(() => {
+    if (region !== 'C') return
     const url = district
       ? `${BASE}data/bivariate_by_amphoe/${province}/${district}.json`
       : province
@@ -194,15 +195,15 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
         return r.json()
       })
       .then((rows: BivariateRow[]) => {
-        if (!cancelled) setBivariate(rows)
+        if (!cancelled) setBivariate({ key: bivariateKey, rows })
       })
       .catch(() => {
-        if (!cancelled) setBivariate([])
+        if (!cancelled) setBivariate({ key: bivariateKey, rows: [] })
       })
     return () => {
       cancelled = true
     }
-  }, [province, district])
+  }, [region, province, district, bivariateKey])
 
   const highLongCell = useMemo(() => bivariate.find((b) => b.class_id === 9), [bivariate])
 
@@ -244,6 +245,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
 
   function selectRegion(r: string) {
     setRegion(r)
+    if (r !== 'C') setLayer('classes')
     setProvince('')
     setDistrict('')
   }
@@ -261,15 +263,17 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
     setDistrict(ampCode)
   }
 
-  function toggleLayer(next: 'classes' | 'analysis') {
+  function toggleLayer(next: 'classes' | 'analysis' | 'abandoned') {
+    if (next === 'analysis' && region !== 'C') return
     setLayer(next)
+    setShowPixelRaster(true)
   }
 
   function clearFilters() {
     setRegion('')
     setProvince('')
     setDistrict('')
-    setLayer('classes')
+    setLayer('abandoned')
   }
 
   const hasActiveFilters = region !== '' || province !== '' || district !== ''
@@ -277,8 +281,8 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
   function stepBack(): boolean {
     if (district) { setDistrict(''); return true }
     if (province) { setProvince(''); return true }
-    if (region) { setRegion(''); setLayer('classes'); return true }
-    if (layer === 'analysis') { setLayer('classes'); return true }
+    if (region) { setRegion(''); setLayer('abandoned'); return true }
+    if (layer !== 'abandoned') { setLayer('abandoned'); return true }
     return false
   }
 
@@ -292,6 +296,11 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
     return true
   }), [caseFeatures, region, province, district])
 
+  function openSelectedCase() {
+    if (!casesInBoundary.length) return
+    setEvidenceOpen(true)
+  }
+
   const dashboardTitle = district
     ? districtOptions.find(([code]) => code === district)?.[1] ?? 'Selected district'
     : province
@@ -303,6 +312,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
   return (
     <div className="explore-layout">
       <aside className="explore-sidebar">
+        <h1 className="explore-sr-only">Explore abandoned land</h1>
         <div className="breadcrumb-mini">
           Thailand
           {region && <> &gt; {REGION_NAMES[region] ?? region}</>}
@@ -311,11 +321,13 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
         </div>
 
         <div className="sidebar-section-label">FILTERS</div>
-        <label className="sidebar-label">Region</label>
+        <label className="sidebar-label" htmlFor="filter-region">Region</label>
         <select
+          id="filter-region"
           value={region}
           onChange={(e) => {
             setRegion(e.target.value)
+            if (e.target.value !== 'C') setLayer('classes')
             setProvince('')
             setDistrict('')
           }}
@@ -328,8 +340,9 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
           ))}
         </select>
 
-        <label className="sidebar-label">Province</label>
+        <label className="sidebar-label" htmlFor="filter-province">Province</label>
         <select
+          id="filter-province"
           value={province}
           disabled={!region}
           onChange={(e) => {
@@ -345,8 +358,8 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
           ))}
         </select>
 
-        <label className="sidebar-label">District</label>
-        <select value={district} disabled={!province} onChange={(e) => setDistrict(e.target.value)}>
+        <label className="sidebar-label" htmlFor="filter-district">District</label>
+        <select id="filter-district" value={district} disabled={!province} onChange={(e) => setDistrict(e.target.value)}>
           <option value="">All</option>
           {districtOptions.map(([code, name]) => (
             <option key={code} value={code}>
@@ -364,22 +377,38 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
         </div>
         <label className="layer-checkbox">
           <input type="checkbox" checked={showPixelRaster} onChange={(e) => setShowPixelRaster(e.target.checked)} />
-          Pixel raster
+          Raster overlay
         </label>
         <label className="layer-checkbox">
           <input type="checkbox" checked={showBoundaryLines} onChange={(e) => setShowBoundaryLines(e.target.checked)} />
           Boundary lines
         </label>
+        <label className="layer-checkbox" title={layer === 'analysis' ? 'Clusters are hidden in Evidence view' : ''}><input type="checkbox" checked={showClusters} disabled={layer === 'analysis'} onChange={e => setShowClusters(e.target.checked)} />Cluster composition</label>
 
         <div className="sidebar-section-label" style={{ marginTop: 20 }}>
-          LEGEND
+          MAP LEGEND
         </div>
         <div className="legend-list">
-          <div className="legend-item"><span className="legend-swatch" style={{ background: '#a3e635' }} /> C1 — Abandoned field crops</div>
-          <div className="legend-item"><span className="legend-swatch" style={{ background: '#38bdf8' }} /> C2 — Shrub encroachment</div>
+          {layer === 'abandoned'
+            ? <div className="legend-item"><span className="legend-swatch" style={{ background: '#facc15' }} /> Abandoned — any detected pixel</div>
+            : <>
+              <div className="legend-item"><span className="legend-swatch" style={{ background: '#a3e635' }} /> C1 — Abandoned field crops</div>
+              <div className="legend-item"><span className="legend-swatch" style={{ background: '#38bdf8' }} /> C2 — Shrub encroachment</div>
+            </>}
+          <div className="legend-overlay-status">Raster: {layer === 'classes' ? 'TYPE (C1 / C2)' : layer === 'abandoned' ? 'ABANDONED (single color)' : 'EVIDENCE (Probability x Duration)'}{!showPixelRaster && ' - hidden'}</div>
+          {region === 'C' && <div className="evidence-map-legend">
+            <h3>EVIDENCE COLORS</h3><p>Probability (%) by duration (years)</p>
+            <div className="evidence-legend-matrix"><span /><span>&gt;0&ndash;&lt;3</span><span>3&ndash;&lt;5</span><span>&ge;5</span>
+              {['\u226575%', '50\u2013<75%', '<50%'].map((label, row) => <Fragment key={label}><span>{label}</span>{[0, 1, 2].map(col => <i key={col} style={{ background: BIV_COLORS[bivClassId(row, col)] }} role="img" aria-label={label + ' probability; ' + ['over 0 to under 3', '3 to under 5', '5 or more'][col] + ' years'} />)}</Fragment>)}
+            </div><p>Yellow: probability &ge;75%, duration &ge;5 years.</p>
+          </div>}
           <div className="legend-item"><span className="legend-line solid" /> Selected boundary</div>
+          <div className="legend-item"><span className="legend-line hovered" /> Hovered area</div>
+          {region === 'C' && <div className="legend-item"><span className="case-legend-dot" /> Case-study location</div>}
+          <p className="legend-footnote">Transparent raster areas have no displayed classification.</p>
           <div className="legend-item"><span className="legend-line dashed" /> Sub-areas — click to drill in</div>
-          <div className="legend-item"><span className="legend-bubble" /> Bubble size = detected pixels</div>
+          {layer === 'abandoned' && <div className="cluster-key"><span className="cluster-key-solid" /><span>Circle size = detected pixels<br />Plain yellow — no type split</span></div>}
+          {layer === 'classes' && <div className="cluster-key"><span className="cluster-key-ring" /><span>Circle size = detected pixels<br />Ring color = C1 / C2 share</span></div>}
         </div>
 
         <p className="stat-sub" style={{ marginTop: 20 }}>Filters update map + dashboard</p>
@@ -387,6 +416,20 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
 
       <div className="explore-main">
         <div className="explore-map">
+<div className="map-display-tabs" aria-label="Raster overlay">
+            <button className={layer === 'abandoned' ? 'active' : ''} aria-pressed={layer === 'abandoned'} onClick={() => toggleLayer('abandoned')}>ABANDONED</button>
+            <button className={layer === 'classes' ? 'active' : ''} aria-pressed={layer === 'classes'} onClick={() => toggleLayer('classes')}>TYPE</button>
+            <button
+              className={layer === 'analysis' ? 'active' : ''}
+              aria-pressed={layer === 'analysis'}
+              disabled={region !== 'C'}
+              title={region !== 'C' ? 'Probability x Duration raster available for Central only' : ''}
+              onClick={() => toggleLayer('analysis')}
+            >
+              EVIDENCE
+            </button>
+          </div>
+          <button className="map-home" aria-label="Reset map to Thailand" onClick={clearFilters}><LineIcon name="pin" /></button>
           <ExploreMap
             nationalFeatures={features}
             boundaryFeatures={filtered}
@@ -396,7 +439,9 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
             districtCode={district}
             showBoundaryLines={showBoundaryLines}
             showPixelRaster={showPixelRaster}
+            showClusters={showClusters}
             showAnalysis={layer === 'analysis'}
+            showAbandoned={layer === 'abandoned'}
             hoveredProvince={hoveredProvince}
             hoveredDistrict={hoveredDistrict}
             onSelectRegion={selectRegion}
@@ -412,29 +457,17 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
         <div className="explore-resizer" onMouseDown={startResize} />
 
         <aside className="explore-dashboard" style={{ '--dash-w': `${dashboardWidth}px` } as CSSProperties}>
+
           <div className="total-card">
-                <div className="panel-title">{dashboardTitle}</div>
+                <div className="extent-label">SELECTED EXTENT</div><div className="extent-title">{dashboardTitle}</div>
+                <div className="extent-steps" aria-label="Exploration depth">{['Thailand', 'Region', 'Province', 'District'].map((label, index) => <span key={label} className={index === (district ? 3 : province ? 2 : region ? 1 : 0) ? 'active' : ''}><b>{index + 1}</b><small>{label}</small></span>)}</div>
                 <div className="stat-sub">{district || province || region ? 'C1 + C2 · nominal 30m estimate' : 'Model output / Thailand'}</div>
-                <div className="big-number">{pxRai(agg.pxTotal, agg.areaAban)}</div>
+                <div className="big-number">{agg.pxTotal.toLocaleString()} px <small>(&asymp; {agg.areaAban.toLocaleString(undefined, { maximumFractionDigits: 2 })} rai)</small></div>
               </div>
 
-              <div className="dash-layer-tabs">
-                <button className={`dash-layer-tab ${layer === 'classes' ? 'active' : ''}`} onClick={() => toggleLayer('classes')}>
-                  ◈ Type
-                </button>
-                <button
-                  className={`dash-layer-tab ${layer === 'analysis' ? 'active' : ''}`}
-                  onClick={() => toggleLayer('analysis')}
-                  disabled={region !== 'C'}
-                  title={region !== 'C' ? 'Bivariate analysis data available for Central (C) only' : ''}
-                >
-                  📊 Analysis {region !== 'C' && '(C only)'}
-                </button>
-              </div>
-
-              <div className="type-top-row">
+              <div className={`type-top-row ${district ? 'district-summary' : ''}`}>
                 <div className="dash-col">
-                  <div className="panel-title" style={{ marginTop: 16 }}>Type</div>
+                  <div className="panel-title" style={{ marginTop: 16 }}>Type composition</div>
                   <TypeDoughnut pxType1={agg.pxType1} pxType2={agg.pxType2} pct1={agg.pct1} pct2={agg.pct2} />
                 </div>
                 {!province && (
@@ -451,15 +484,14 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
                 )}
               </div>
 
-              {layer === 'analysis' && (
-                <>
-                  <div className="panel-title" style={{ marginTop: 20 }}>Probability × Duration</div>
+              {region === 'C' && (<>
+                  <section className="analysis-matrix"><div className="panel-title">Probability &times; Duration <small>Stronger abandonment evidence &#8599;</small></div>
                   <div className="bivariate-grid mini">
                     <div />
-                    <div className="axis-label center">&gt;0-&lt;3</div>
-                    <div className="axis-label center">3-&lt;5</div>
-                    <div className="axis-label center">&gt;=5</div>
-                    {['>=75', '50-<75', '<50'].map((probLabel, rowIdx) => {
+                    <div className="axis-label center">&gt;0&ndash;&lt;3 yr</div>
+                    <div className="axis-label center">3&ndash;&lt;5 yr</div>
+                    <div className="axis-label center">&ge;5 yr</div>
+                    {['≥75%', '50–<75%', '<50%'].map((probLabel, rowIdx) => {
                       return (
                         <Fragment key={probLabel}>
                           <div className="axis-label">{probLabel}</div>
@@ -472,11 +504,11 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
                               <div
                                 className="cell"
                                 key={classId}
-                                style={{ background: BIV_COLORS[classId] }}
+                                style={{ background: BIV_COLORS[classId], color: classId === 9 ? '#17231f' : '#ffffff' }}
                                 title={`${px.toLocaleString()} px (≈${rai.toLocaleString(undefined, { maximumFractionDigits: 2 })} rai)`}
                               >
-                                <span className="cell-value">{px.toLocaleString()}</span>
-                                <span className="cell-sub">{rai.toLocaleString(undefined, { maximumFractionDigits: 0 })} rai</span>
+                                <span className="cell-value">{row ? px.toLocaleString() : '\u2014'}</span>
+                                <span className="cell-sub">{row ? rai.toLocaleString(undefined, { maximumFractionDigits: 0 }) + ' rai' : 'No data'}</span>
                               </div>
                             )
                           })}
@@ -485,8 +517,10 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
                     })}
                   </div>
 
+                  </section>
                   <div className="stat-chip-row" style={{ marginTop: 14 }}>
                     <div className="stat-chip">
+                      <div className="metric-label"><LineIcon name="target" /> HIGH EVIDENCE</div>
                       <div className="stat-chip-value good">
                         {highLongCell ? highLongCell.pixel_count.toLocaleString() : '…'} px
                       </div>
@@ -495,35 +529,10 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
                       </div>
                     </div>
                     <div className="stat-chip">
-                      <div className="stat-chip-value">346,653</div>
-                      <div className="stat-chip-sub">Undated (YOD=0/Duration=0)</div>
+                      <div className="metric-label"><LineIcon name="search" />SELECTED CASE STUDIES</div><div className="stat-chip-value">{casesInBoundary.length}</div><button className="case-open-mini" disabled={!casesInBoundary.length} onClick={openSelectedCase}>OPEN CASE STUDY &rarr;</button>
                     </div>
                   </div>
-
-                  <div className="panel-title" style={{ marginTop: 16 }}>Case studies in selected boundary ({casesInBoundary.length})</div>
-                  {casesInBoundary.map((f) => {
-                    const p = f.properties as { case_name: string; amphoe_e?: string }
-                    return (
-                      <label className="case-radio" key={p.case_name}>
-                        <input
-                          type="radio"
-                          checked={selectedCase === p.case_name}
-                          onChange={() => setSelectedCase(p.case_name)}
-                        />
-                        {caseLabel(p.case_name)} · {p.amphoe_e}
-                      </label>
-                    )
-                  })}
-                  <button
-                    className="cta-button full"
-                    disabled={casesInBoundary.length === 0}
-                    onClick={() => setEvidenceOpen(true)}
-                  >
-                    OPEN CASE STUDY
-                    <div className="cta-sub">Zoom to selected point and view evidence.</div>
-                  </button>
-                </>
-              )}
+                </>)}
         </aside>
       </div>
 

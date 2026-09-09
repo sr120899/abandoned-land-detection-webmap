@@ -17,7 +17,7 @@ function EvidenceSheet({ caseName, onChangeCase, onClose }: Props) {
   const loc = CASE_LOCATIONS[caseName]
 
   return (
-    <div className="evidence-sheet">
+    <div className="evidence-sheet" role="dialog" aria-modal="true" aria-label={caseLabel(caseName)}>
       <div className="evidence-sheet-header">
         <div className="breadcrumb">
           Central &gt; {loc?.province} &gt; {loc?.amphoe}
@@ -35,7 +35,7 @@ function EvidenceSheet({ caseName, onChangeCase, onClose }: Props) {
         ))}
       </div>
 
-      <ValidationSampleCard caseName={caseName} />
+      <ValidationSampleCard key={caseName} caseName={caseName} />
 
       <div className="note-card">
         <strong>Expert interpretation note:</strong> Verify land-use history and persistence before concluding
