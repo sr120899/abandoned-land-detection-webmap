@@ -137,7 +137,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
   const [region, setRegion] = useState<string>('')
   const [province, setProvince] = useState<string>('')
   const [district, setDistrict] = useState<string>('')
-  const [layer, setLayer] = useState<'classes' | 'analysis' | 'abandoned'>('abandoned')
+  const [layer, setLayer] = useState<'classes' | 'analysis'>('classes')
   const [bivariateResult, setBivariate] = useState<{ key: string; rows: BivariateRow[] }>({ key: '', rows: [] })
   const bivariateKey = `${region}/${province}/${district}`
   const bivariate = useMemo(() => bivariateResult.key === bivariateKey ? bivariateResult.rows : [], [bivariateResult, bivariateKey])
@@ -263,7 +263,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
     setDistrict(ampCode)
   }
 
-  function toggleLayer(next: 'classes' | 'analysis' | 'abandoned') {
+  function toggleLayer(next: 'classes' | 'analysis') {
     if (next === 'analysis' && region !== 'C') return
     setLayer(next)
     setShowPixelRaster(true)
@@ -273,7 +273,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
     setRegion('')
     setProvince('')
     setDistrict('')
-    setLayer('abandoned')
+    setLayer('classes')
   }
 
   const hasActiveFilters = region !== '' || province !== '' || district !== ''
@@ -281,8 +281,8 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
   function stepBack(): boolean {
     if (district) { setDistrict(''); return true }
     if (province) { setProvince(''); return true }
-    if (region) { setRegion(''); setLayer('abandoned'); return true }
-    if (layer !== 'abandoned') { setLayer('abandoned'); return true }
+    if (region) { setRegion(''); setLayer('classes'); return true }
+    if (layer !== 'classes') { setLayer('classes'); return true }
     return false
   }
 
@@ -389,13 +389,9 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
           MAP LEGEND
         </div>
         <div className="legend-list">
-          {layer === 'abandoned'
-            ? <div className="legend-item"><span className="legend-swatch" style={{ background: '#facc15' }} /> Abandoned — any detected pixel</div>
-            : <>
-              <div className="legend-item"><span className="legend-swatch" style={{ background: '#a3e635' }} /> C1 — Abandoned field crops</div>
-              <div className="legend-item"><span className="legend-swatch" style={{ background: '#38bdf8' }} /> C2 — Shrub encroachment</div>
-            </>}
-          <div className="legend-overlay-status">Raster: {layer === 'classes' ? 'TYPE (C1 / C2)' : layer === 'abandoned' ? 'ABANDONED (single color)' : 'EVIDENCE (Probability x Duration)'}{!showPixelRaster && ' - hidden'}</div>
+          <div className="legend-item"><span className="legend-swatch" style={{ background: '#a3e635' }} /> C1 &mdash; Abandoned field crops</div>
+          <div className="legend-item"><span className="legend-swatch" style={{ background: '#38bdf8' }} /> C2 &mdash; Shrub encroachment</div>
+          <div className="legend-overlay-status">Raster: {layer === 'classes' ? 'TYPE (C1 / C2)' : 'EVIDENCE (Probability x Duration)'}{!showPixelRaster && ' - hidden'}</div>
           {region === 'C' && <div className="evidence-map-legend">
             <h3>EVIDENCE COLORS</h3><p>Probability (%) by duration (years)</p>
             <div className="evidence-legend-matrix"><span /><span>&gt;0&ndash;&lt;3</span><span>3&ndash;&lt;5</span><span>&ge;5</span>
@@ -407,7 +403,6 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
           {region === 'C' && <div className="legend-item"><span className="case-legend-dot" /> Case-study location</div>}
           <p className="legend-footnote">Transparent raster areas have no displayed classification.</p>
           <div className="legend-item"><span className="legend-line dashed" /> Sub-areas — click to drill in</div>
-          {layer === 'abandoned' && <div className="cluster-key"><span className="cluster-key-solid" /><span>Circle size = detected pixels<br />Plain yellow — no type split</span></div>}
           {layer === 'classes' && <div className="cluster-key"><span className="cluster-key-ring" /><span>Circle size = detected pixels<br />Ring color = C1 / C2 share</span></div>}
         </div>
 
@@ -417,7 +412,6 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
       <div className="explore-main">
         <div className="explore-map">
 <div className="map-display-tabs" aria-label="Raster overlay">
-            <button className={layer === 'abandoned' ? 'active' : ''} aria-pressed={layer === 'abandoned'} onClick={() => toggleLayer('abandoned')}>ABANDONED</button>
             <button className={layer === 'classes' ? 'active' : ''} aria-pressed={layer === 'classes'} onClick={() => toggleLayer('classes')}>TYPE</button>
             <button
               className={layer === 'analysis' ? 'active' : ''}
@@ -441,7 +435,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
             showPixelRaster={showPixelRaster}
             showClusters={showClusters}
             showAnalysis={layer === 'analysis'}
-            showAbandoned={layer === 'abandoned'}
+            showAbandoned={false}
             hoveredProvince={hoveredProvince}
             hoveredDistrict={hoveredDistrict}
             onSelectRegion={selectRegion}
@@ -533,6 +527,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
                     </div>
                   </div>
                 </>)}
+          <p className="demo-scope-note">Note: This live demo includes Evidence (Probability &times; Duration) analysis and case-study locations for the Central region only. Other regions show Type classification and totals.</p>
         </aside>
       </div>
 

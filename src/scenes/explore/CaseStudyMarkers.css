@@ -14,8 +14,7 @@
 .composition-compact:hover, .composition-compact:focus-visible { z-index: 14; }
 
 /* The pixel count is the headline everywhere; the region letter (when present) stays a
-   smaller supporting tag. Donut ring, hollow center: black text with a light halo so it
-   stays legible over whatever basemap shows through the hole. */
+   smaller supporting tag. Donut ring with a solid yellow center and dark text for contrast. */
 .explore-shell .bubble-marker.composition-marker .bubble-value,
 .explore-shell .bubble-marker.composition-marker .bubble-value:only-child {
  font-family: 'Segoe UI', 'Sarabun', system-ui, sans-serif;
@@ -25,7 +24,7 @@
  line-height: 1.05;
  letter-spacing: -.025em;
  color: #1a1200;
- text-shadow: 0 0 4px #fff9e6, 0 0 2px #fff9e6;
+ text-shadow: none;
  white-space: nowrap;
 }
 .explore-shell .bubble-marker.composition-marker .bubble-label {
@@ -34,14 +33,6 @@
  font-weight: 700;
  line-height: 1.15;
  color: #1a1200;
- text-shadow: 0 0 4px #fff9e6, 0 0 2px #fff9e6;
- margin-bottom: 1px;
-}
-/* ABANDONED view: a flat yellow disc — black text needs no halo against its own solid,
-   known-bright background. */
-.explore-shell .composition-marker.composition-abandoned .bubble-value,
-.explore-shell .composition-marker.composition-abandoned .bubble-value:only-child,
-.explore-shell .composition-marker.composition-abandoned .bubble-label {
- color: #1a1200;
  text-shadow: none;
+ margin-bottom: 1px;
 }
