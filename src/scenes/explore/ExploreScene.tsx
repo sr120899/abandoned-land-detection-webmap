@@ -2,122 +2,15 @@ import './ExploreVisual.css'
 import LineIcon from '../../components/LineIcon'
 import { Fragment, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
-import { Doughnut, Bar } from 'react-chartjs-2'
-import {
-  Chart as ChartJS,
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-} from 'chart.js'
-import { useBoundaryData, aggregate, topProvinces, topRegions, REGION_NAMES } from '../../hooks/useBoundaryData'
+import { useBoundaryData, REGION_NAMES } from '../../hooks/useBoundaryData'
 import type { AmphoeFeature } from '../../hooks/useBoundaryData'
 import ExploreMap from './ExploreMap'
 import EvidenceSheet from './EvidenceSheet'
+import DecisionDashboard from './DecisionDashboard'
 import { BIV_COLORS, bivClassId } from '../../utils/bivariateColors'
 import { useLanguage } from '../../i18n/LanguageContext'
 
-ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend)
-
 const BASE = import.meta.env.BASE_URL
-
-function TypeDoughnut({ pxType1, pxType2, pct1, pct2 }: { pxType1: number; pxType2: number; pct1: number; pct2: number }) {
-  const data = {
-    labels: ['C1 Abandoned field crops', 'C2 Shrub encroachment'],
-    datasets: [
-      {
-        data: [pxType1, pxType2],
-        backgroundColor: ['#a3e635', '#38bdf8'],
-        borderColor: '#051e2b',
-        borderWidth: 2,
-      },
-    ],
-  }
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: '68%',
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: (ctx: { label: string; raw: unknown }) => `${ctx.label}: ${Number(ctx.raw).toLocaleString()} px`,
-        },
-      },
-    },
-  }
-  return (
-    <div className="doughnut-row">
-      <div className="doughnut-wrap">
-        <Doughnut data={data} options={options} />
-      </div>
-      <div className="doughnut-legend">
-        <div><span className="dot" style={{ background: '#a3e635' }} /> C1 · {pct1.toFixed(1)}%</div>
-        <div><span className="dot" style={{ background: '#38bdf8' }} /> C2 · {pct2.toFixed(1)}%</div>
-      </div>
-    </div>
-  )
-}
-
-interface RankedBarProps {
-  data: { code: string; name: string; area: number }[]
-  hovered: string
-  onHover: (code: string) => void
-  onSelect: (code: string) => void
-}
-
-function RankedBar({ data, hovered, onHover, onSelect }: RankedBarProps) {
-  const chartData = {
-    labels: data.map((d) => d.name),
-    datasets: [
-      {
-        data: data.map((d) => d.area),
-        backgroundColor: data.map((d) => (d.code === hovered ? '#fde68a' : '#facc15')),
-        hoverBackgroundColor: '#fde68a',
-        borderRadius: 4,
-        barThickness: 18,
-      },
-    ],
-  }
-  const options = {
-    indexAxis: 'y' as const,
-    responsive: true,
-    maintainAspectRatio: false,
-    onHover: (_evt: unknown, elements: { index: number }[]) => {
-      onHover(elements.length ? data[elements[0].index].code : '')
-    },
-    onClick: (_evt: unknown, elements: { index: number }[]) => {
-      if (elements.length) onSelect(data[elements[0].index].code)
-    },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: (ctx: { raw: unknown }) => `${Number(ctx.raw).toLocaleString(undefined, { maximumFractionDigits: 2 })} rai`,
-        },
-      },
-    },
-    scales: {
-      x: { ticks: { color: '#acc1cf', font: { size: 9.5 } }, grid: { color: '#1b4657' } },
-      y: { ticks: { color: '#acc1cf', font: { size: 10.5 } }, grid: { display: false } },
-    },
-  }
-  return (
-    <div className="bar-chart-wrap" style={{ height: `${data.length * 34 + 30}px`, cursor: 'pointer' }}>
-      <Bar data={chartData} options={options} />
-    </div>
-  )
-}
-
-interface BivariateRow {
-  class_id: number
-  probability: string
-  duration: string
-  pixel_count: number
-  area_rai: number
-}
 
 export interface ExploreSceneHandle {
   /** Undo one level of drill-down (district -> province -> region -> analysis off). Returns
@@ -136,21 +29,17 @@ function defaultDashboardWidth(): number {
 
 const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props, ref) {
   const { t } = useLanguage()
-  const { features } = useBoundaryData()
+  const { features, loading } = useBoundaryData()
   const [region, setRegion] = useState<string>('')
   const [province, setProvince] = useState<string>('')
   const [district, setDistrict] = useState<string>('')
   const [layer, setLayer] = useState<'detected' | 'classes' | 'analysis'>('detected')
-  const [bivariateResult, setBivariate] = useState<{ key: string; rows: BivariateRow[] }>({ key: '', rows: [] })
-  const bivariateKey = `${region}/${province}/${district}`
-  const bivariate = useMemo(() => bivariateResult.key === bivariateKey ? bivariateResult.rows : [], [bivariateResult, bivariateKey])
   const [caseFeatures, setCaseFeatures] = useState<GeoJSON.Feature[]>([])
   const [selectedCase, setSelectedCase] = useState<string>('point_4')
   const [evidenceOpen, setEvidenceOpen] = useState(false)
   const [showClusters, setShowClusters] = useState(true)
   const [showBoundaryLines, setShowBoundaryLines] = useState(true)
   const [showPixelRaster, setShowPixelRaster] = useState(true)
-  const [hoveredRegion, setHoveredRegion] = useState('')
   const [hoveredProvince, setHoveredProvince] = useState('')
   const [hoveredDistrict, setHoveredDistrict] = useState('')
   const [dashboardWidth, setDashboardWidth] = useState(defaultDashboardWidth)
@@ -183,34 +72,6 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
     fetch(`${BASE}data/case_studies.geojson`).then((r) => r.json()).then((fc: GeoJSON.FeatureCollection) => setCaseFeatures(fc.features))
   }, [])
 
-  // Probability × Duration breakdown for whichever boundary is currently selected —
-  // per-amphoe if drilled to a district, per-province, or the Central-wide default.
-  useEffect(() => {
-    if (region !== 'C') return
-    const url = district
-      ? `${BASE}data/bivariate_by_amphoe/${province}/${district}.json`
-      : province
-        ? `${BASE}data/bivariate_by_province/${province}.json`
-        : `${BASE}data/bivariate_legend_C.json`
-    let cancelled = false
-    fetch(url)
-      .then((r) => {
-        if (!r.ok) throw new Error('not found')
-        return r.json()
-      })
-      .then((rows: BivariateRow[]) => {
-        if (!cancelled) setBivariate({ key: bivariateKey, rows })
-      })
-      .catch(() => {
-        if (!cancelled) setBivariate({ key: bivariateKey, rows: [] })
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [region, province, district, bivariateKey])
-
-  const highLongCell = useMemo(() => bivariate.find((b) => b.class_id === 9), [bivariate])
-
   const filtered: AmphoeFeature[] = useMemo(() => {
     return features.filter((f) => {
       if (region && f.properties.Region !== region) return false
@@ -219,18 +80,6 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
       return true
     })
   }, [features, region, province, district])
-
-  const agg = useMemo(() => aggregate(filtered), [filtered])
-  const topReg = useMemo(() => topRegions(filtered), [filtered])
-  const top5 = useMemo(() => topProvinces(filtered, 5), [filtered])
-  const topAmphoe = useMemo(
-    () =>
-      [...filtered]
-        .sort((a, b) => b.properties.area_aban - a.properties.area_aban)
-        .slice(0, 5)
-        .map((f) => ({ code: f.properties.AMP_CODE, name: f.properties.AMPHOE_E, area: f.properties.area_aban })),
-    [filtered],
-  )
 
   const provinceOptions = useMemo(() => {
     const map = new Map<string, string>()
@@ -249,6 +98,8 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
   }, [features, province])
 
   function selectRegion(r: string) {
+    setHoveredProvince('')
+    setHoveredDistrict('')
     setRegion(r)
     if (r !== 'C' && layer === 'analysis') setLayer('detected')
     setProvince('')
@@ -256,6 +107,8 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
   }
 
   function selectProvince(provCode: string) {
+    setHoveredProvince('')
+    setHoveredDistrict('')
     if (!region) {
       const f = features.find((f) => String(f.properties.PROV_CODE) === provCode)
       if (f) setRegion(f.properties.Region)
@@ -265,6 +118,8 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
   }
 
   function selectDistrict(ampCode: string) {
+    setHoveredProvince('')
+    setHoveredDistrict('')
     setDistrict(ampCode)
   }
 
@@ -301,8 +156,8 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
     return true
   }), [caseFeatures, region, province, district])
 
-  function openSelectedCase() {
-    if (!casesInBoundary.length) return
+  function openCase(name: string) {
+    setSelectedCase(name)
     setEvidenceOpen(true)
   }
 
@@ -446,7 +301,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
             onSelectRegion={selectRegion}
             onSelectProvince={selectProvince}
             onSelectDistrict={selectDistrict}
-            onSelectCase={setSelectedCase}
+            onSelectCase={openCase}
             onHoverProvince={setHoveredProvince}
             onHoverDistrict={setHoveredDistrict}
             onClickOutside={stepBack}
@@ -460,92 +315,13 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
           <div className="total-card">
                 <div className="extent-label">{t('explore.selectedExtent')}</div><div className="extent-title">{dashboardTitle}</div>
                 <div className="extent-steps" aria-label="Exploration depth">{[t('explore.extentStep.thailand'), t('explore.extentStep.region'), t('explore.extentStep.province'), t('explore.extentStep.district')].map((label, index) => <span key={label} className={index === (district ? 3 : province ? 2 : region ? 1 : 0) ? 'active' : ''}><b>{index + 1}</b><small>{label}</small></span>)}</div>
-                <div className="stat-sub">{district || province || region ? t('explore.nominalEstimate') : t('explore.modelOutputThailand')}</div>
-                <div className="big-number">{agg.pxTotal.toLocaleString()} px <small>(&asymp; {agg.areaAban.toLocaleString(undefined, { maximumFractionDigits: 2 })} rai)</small></div>
-              </div>
-
-              <div className={`type-top-row ${district ? 'district-summary' : ''}`}>
-                <div className="dash-col">
-                  <div className="panel-title" style={{ marginTop: 16 }}>{t('explore.typeComposition')}</div>
-                  <TypeDoughnut pxType1={agg.pxType1} pxType2={agg.pxType2} pct1={agg.pct1} pct2={agg.pct2} />
-                </div>
-                {!region && (
-                  <div className="dash-col">
-                    <div className="panel-title" style={{ marginTop: 16 }}>{t('explore.topRegions')}</div>
-                    <RankedBar data={topReg} hovered={hoveredRegion} onHover={setHoveredRegion} onSelect={selectRegion} />
-                  </div>
-                )}
-                {region && !province && (
-                  <div className="dash-col">
-                    <div className="panel-title" style={{ marginTop: 16 }}>{t('explore.topProvinces')}</div>
-                    <RankedBar data={top5} hovered={hoveredProvince} onHover={setHoveredProvince} onSelect={selectProvince} />
-                  </div>
-                )}
-                {province && !district && (
-                  <div className="dash-col">
-                    <div className="panel-title" style={{ marginTop: 16 }}>{t('explore.topDistricts')}</div>
-                    <RankedBar data={topAmphoe} hovered={hoveredDistrict} onHover={setHoveredDistrict} onSelect={selectDistrict} />
-                  </div>
-                )}
-              </div>
-
-              {!region && (
-                <div className="dash-col dash-col-full">
-                  <div className="panel-title" style={{ marginTop: 16 }}>{t('explore.topProvinces')}</div>
-                  <RankedBar data={top5} hovered={hoveredProvince} onHover={setHoveredProvince} onSelect={selectProvince} />
-                </div>
-              )}
-
-              {region === 'C' && (<>
-                  <section className="analysis-matrix"><div className="panel-title">{t('explore.probDuration')} <small>{t('explore.strongerEvidence')}</small></div>
-                  <div className="bivariate-grid mini">
-                    <div />
-                    <div className="axis-label center">&gt;0&ndash;&lt;3 yr</div>
-                    <div className="axis-label center">3&ndash;&lt;5 yr</div>
-                    <div className="axis-label center">&ge;5 yr</div>
-                    {['≥75%', '50–<75%', '<50%'].map((probLabel, rowIdx) => {
-                      return (
-                        <Fragment key={probLabel}>
-                          <div className="axis-label">{probLabel}</div>
-                          {[0, 1, 2].map((di) => {
-                            const classId = bivClassId(rowIdx, di)
-                            const row = bivariate.find((b) => b.class_id === classId)
-                            const px = row?.pixel_count ?? 0
-                            const rai = row?.area_rai ?? 0
-                            return (
-                              <div
-                                className="cell"
-                                key={classId}
-                                style={{ background: BIV_COLORS[classId], color: classId === 9 ? '#17231f' : '#ffffff' }}
-                                title={`${px.toLocaleString()} px (≈${rai.toLocaleString(undefined, { maximumFractionDigits: 2 })} rai)`}
-                              >
-                                <span className="cell-value">{row ? px.toLocaleString() : '\u2014'}</span>
-                                <span className="cell-sub">{row ? rai.toLocaleString(undefined, { maximumFractionDigits: 0 }) + ' rai' : t('explore.noData')}</span>
-                              </div>
-                            )
-                          })}
-                        </Fragment>
-                      )
-                    })}
-                  </div>
-
-                  </section>
-                  <div className="stat-chip-row" style={{ marginTop: 14 }}>
-                    <div className="stat-chip">
-                      <div className="metric-label"><LineIcon name="target" /> {t('explore.highEvidence')}</div>
-                      <div className="stat-chip-value good">
-                        {highLongCell ? highLongCell.pixel_count.toLocaleString() : '…'} px
-                      </div>
-                      <div className="stat-chip-sub">
-                        High × ≥5yr ≈{highLongCell?.area_rai.toLocaleString(undefined, { maximumFractionDigits: 2 })} rai
-                      </div>
-                    </div>
-                    <div className="stat-chip">
-                      <div className="metric-label"><LineIcon name="search" />{t('explore.selectedCaseStudies')}</div><div className="stat-chip-value">{casesInBoundary.length}</div><button className="case-open-mini" disabled={!casesInBoundary.length} onClick={openSelectedCase}>{t('explore.openCaseStudy')}</button>
-                    </div>
-                  </div>
-                </>)}
-          <p className="demo-scope-note">{t('explore.demoScopeNote')}</p>
+          </div>
+          <DecisionDashboard
+            features={filtered} loading={loading} region={region} province={province} district={district}
+            cases={casesInBoundary} onSelectRegion={selectRegion} onSelectProvince={selectProvince}
+            onSelectDistrict={selectDistrict} onHoverProvince={setHoveredProvince} onHoverDistrict={setHoveredDistrict}
+            hoveredProvince={hoveredProvince} hoveredDistrict={hoveredDistrict} onOpenCase={openCase}
+          />
         </aside>
       </div>
 
