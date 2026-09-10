@@ -65,6 +65,17 @@ export function topProvinces(features: AmphoeFeature[], n = 5) {
   return [...byProv.values()].sort((a, b) => b.area - a.area).slice(0, n)
 }
 
+export function topRegions(features: AmphoeFeature[]) {
+  const byRegion = new Map<string, { code: string; name: string; area: number }>()
+  for (const f of features) {
+    const key = f.properties.Region
+    const cur = byRegion.get(key) ?? { code: key, name: REGION_NAMES[key] ?? key, area: 0 }
+    cur.area += f.properties.area_aban
+    byRegion.set(key, cur)
+  }
+  return [...byRegion.values()].sort((a, b) => b.area - a.area)
+}
+
 export function useBoundaryData() {
   const [features, setFeatures] = useState<AmphoeFeature[]>([])
   const [loading, setLoading] = useState(true)

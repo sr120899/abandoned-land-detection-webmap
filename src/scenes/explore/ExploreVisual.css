@@ -36,12 +36,14 @@
 .explore-shell.explore-shell .dash-layer-tabs { padding: 0; border-radius: 7px; gap: 0; margin: 12px 0; }
 .explore-shell.explore-shell .dash-layer-tab { border-radius: 7px; text-transform: uppercase; }
 .explore-shell.explore-shell .dash-layer-tab.active { border-color: #43c6cf; background: #00323a; }
-.explore-shell.explore-shell .type-top-row { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0,1.4fr); gap: 10px; align-items: stretch; }
-.explore-shell.explore-shell .dash-col { border: 1px solid #205568; border-radius: 9px; padding: 14px 12px; min-width: 0; background: #00232f; }
+.explore-shell.explore-shell .type-top-row { display: grid; grid-template-columns: minmax(0, 36fr) minmax(0, 64fr); gap: 12px; align-items: stretch; }
+.explore-shell.explore-shell .dash-col { border: 1px solid #205568; border-radius: 9px; padding: 18px 14px; min-width: 0; background: #00232f; }
+.explore-shell.explore-shell .dash-col-full { margin-top: 14px; }
+.explore-shell.explore-shell .dash-col .bar-chart-wrap { margin: 22px 0 0; }
 .explore-shell.explore-shell .dash-col .panel-title { margin: 0 0 16px !important; }
 .explore-shell.explore-shell .panel-title { color: #45deda; font-size: 12px; text-transform: uppercase; }
-.explore-shell.explore-shell .doughnut-row { flex-direction: column; gap: 10px; margin: 0; }
-.explore-shell.explore-shell .doughnut-wrap { width: 135px; height: 135px; max-width: 100%; }
+.explore-shell.explore-shell .doughnut-row { flex-direction: column; gap: 14px; margin: 18px 0 0; }
+.explore-shell.explore-shell .doughnut-wrap { width: 165px; height: 165px; max-width: 100%; }
 .explore-shell.explore-shell .doughnut-legend { font-size: 11px; gap: 5px; }
 .analysis-matrix { margin-top: 12px; padding: 14px; border: 1px solid #205568; border-radius: 9px; background: #00232f; }
 .analysis-matrix .panel-title { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
@@ -57,7 +59,10 @@
 .metric-label svg { width: 22px; height: 22px; }
 .explore-shell.explore-shell .stat-chip-value { color: #77ffdb; font-size: 27px; margin: 8px 0; }
 .case-open-mini { padding: 6px 9px; border: 1px solid #37c9ca; border-radius: 5px; background: none; color: #66e8e3; font-size: 10px; cursor: pointer; }
-.map-display-tabs { position: absolute; z-index: 3; top: 16px; left: 16px; display: flex; border: 1px solid #408292; border-radius: 8px; padding: 3px; background: #002432ee; }
+.map-layer-select { position: absolute; z-index: 3; top: 16px; left: 16px; display: flex; align-items: center; gap: 8px; max-width: calc(100% - 80px); border: 1px solid #408292; border-radius: 8px; padding: 6px 10px; background: #002432ee; }
+.map-layer-select label { color: #bad7e3; font-size: 11px; }
+.map-layer-select select { min-width: 0; max-width: 100%; border: 0; border-radius: 4px; padding: 6px; background: #002432; color: #facc15; font: inherit; font-size: 12px; cursor: pointer; }
+.map-layer-select select:focus-visible { outline: 2px solid #29e6e5; outline-offset: 2px; }
 .map-display-tabs button { padding: 8px 17px; border: 0; border-radius: 5px; background: transparent; color: #bad7e3; font-size: 11px; font-weight: 700; cursor: pointer; }
 .map-display-tabs button.active { background: #29e6e5; color: #00222c; }
 .map-home { position: absolute; z-index: 3; top: 124px; right: 10px; width: 36px; height: 36px; border: 1px solid #3e788a; border-radius: 7px; color: #c2f7f2; background: #052c3be8; cursor: pointer; display: grid; place-items: center; }

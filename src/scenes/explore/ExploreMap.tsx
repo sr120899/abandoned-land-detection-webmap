@@ -601,7 +601,7 @@ function ExploreMap({
         const size = compact ? 30 + Math.sqrt(item.total / maxTotal) * 28 : 46 + Math.sqrt(item.total / maxTotal) * 42
         const el = document.createElement('button')
         el.type = 'button'
-        el.className = `bubble-marker composition-marker${compact ? ' composition-compact' : ''}${showAbandoned ? ' composition-abandoned' : ''}`
+        el.className = `bubble-marker composition-marker${compact ? ' composition-compact' : ''}`
         const share = item.total > 0 ? item.c1 / item.total * 100 : 0
         el.style.setProperty('--c1-share', share + '%')
         el.title = item.label + ': ' + item.total.toLocaleString() + ' pixels; C1 ' + share.toFixed(1) + '%, C2 ' + (100 - share).toFixed(1) + '%. Click to explore.'
@@ -700,7 +700,7 @@ function ExploreMap({
     return () => {
       cancelled = true
     }
-  }, [regionCode, provinceCode, districtCode, boundaryFeatures, nationalFeatures, mapLoaded, showClusters, showAbandoned, showAnalysis])
+  }, [regionCode, provinceCode, districtCode, boundaryFeatures, nationalFeatures, mapLoaded, showClusters, showAnalysis])
 
   // Reflect dashboard-driven hover (e.g. the Top 5 provinces bar chart) onto the
   // map's province fill, so pointing at either side highlights the other.
@@ -858,6 +858,8 @@ function ExploreMap({
     const map = mapRef.current
     if (!map || !mapLoaded) return
 
+    let cancelled = false
+
     async function applyProvinceRaster(dataDir: string, sourceId: string, layerId: string, show: boolean, recolor?: boolean) {
       const map2 = mapRef.current
       if (!map2) return
@@ -870,16 +872,19 @@ function ExploreMap({
           if (!r.ok) throw new Error('not found')
           return r.json()
         })
+        if (cancelled) return
         const source = map2.getSource(sourceId) as maplibregl.ImageSource | undefined
         const pngUrl = `${BASE}data/${dataDir}/${provinceCode}.png`
         if (recolor) {
           const bitmap = await recolorToYellow(pngUrl)
+          if (cancelled) return
           source?.updateImage({ image: bitmap, coordinates: boundsToCoords(bounds) })
         } else {
           source?.updateImage({ url: pngUrl, coordinates: boundsToCoords(bounds) })
         }
         map2.setLayoutProperty(layerId, 'visibility', 'visible')
       } catch {
+        if (cancelled) return
         map2.setLayoutProperty(layerId, 'visibility', 'none')
       }
     }
@@ -897,6 +902,7 @@ function ExploreMap({
       'province_bivariate', 'province-bivariate', 'province-bivariate-layer',
       showAnalysis && provinceCode !== '' && showPixelRaster,
     )
+    return () => { cancelled = true }
   }, [provinceCode, showAnalysis, showAbandoned, showPixelRaster, mapLoaded])
 
   // DOM markers stay above raster and vector layers, on every basemap.

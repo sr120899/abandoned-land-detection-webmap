@@ -12,7 +12,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js'
-import { useBoundaryData, aggregate, topProvinces, REGION_NAMES } from '../../hooks/useBoundaryData'
+import { useBoundaryData, aggregate, topProvinces, topRegions, REGION_NAMES } from '../../hooks/useBoundaryData'
 import type { AmphoeFeature } from '../../hooks/useBoundaryData'
 import ExploreMap from './ExploreMap'
 import EvidenceSheet from './EvidenceSheet'
@@ -76,7 +76,7 @@ function RankedBar({ data, hovered, onHover, onSelect }: RankedBarProps) {
         backgroundColor: data.map((d) => (d.code === hovered ? '#fde68a' : '#facc15')),
         hoverBackgroundColor: '#fde68a',
         borderRadius: 4,
-        barThickness: 14,
+        barThickness: 18,
       },
     ],
   }
@@ -104,7 +104,7 @@ function RankedBar({ data, hovered, onHover, onSelect }: RankedBarProps) {
     },
   }
   return (
-    <div className="bar-chart-wrap" style={{ height: `${data.length * 30 + 20}px`, cursor: 'pointer' }}>
+    <div className="bar-chart-wrap" style={{ height: `${data.length * 34 + 30}px`, cursor: 'pointer' }}>
       <Bar data={chartData} options={options} />
     </div>
   )
@@ -138,7 +138,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
   const [region, setRegion] = useState<string>('')
   const [province, setProvince] = useState<string>('')
   const [district, setDistrict] = useState<string>('')
-  const [layer, setLayer] = useState<'classes' | 'analysis'>('classes')
+  const [layer, setLayer] = useState<'detected' | 'classes' | 'analysis'>('detected')
   const [bivariateResult, setBivariate] = useState<{ key: string; rows: BivariateRow[] }>({ key: '', rows: [] })
   const bivariateKey = `${region}/${province}/${district}`
   const bivariate = useMemo(() => bivariateResult.key === bivariateKey ? bivariateResult.rows : [], [bivariateResult, bivariateKey])
@@ -148,6 +148,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
   const [showClusters, setShowClusters] = useState(true)
   const [showBoundaryLines, setShowBoundaryLines] = useState(true)
   const [showPixelRaster, setShowPixelRaster] = useState(true)
+  const [hoveredRegion, setHoveredRegion] = useState('')
   const [hoveredProvince, setHoveredProvince] = useState('')
   const [hoveredDistrict, setHoveredDistrict] = useState('')
   const [dashboardWidth, setDashboardWidth] = useState(defaultDashboardWidth)
@@ -218,6 +219,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
   }, [features, region, province, district])
 
   const agg = useMemo(() => aggregate(filtered), [filtered])
+  const topReg = useMemo(() => topRegions(filtered), [filtered])
   const top5 = useMemo(() => topProvinces(filtered, 5), [filtered])
   const topAmphoe = useMemo(
     () =>
@@ -246,7 +248,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
 
   function selectRegion(r: string) {
     setRegion(r)
-    if (r !== 'C') setLayer('classes')
+    if (r !== 'C' && layer === 'analysis') setLayer('detected')
     setProvince('')
     setDistrict('')
   }
@@ -264,7 +266,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
     setDistrict(ampCode)
   }
 
-  function toggleLayer(next: 'classes' | 'analysis') {
+  function toggleLayer(next: 'detected' | 'classes' | 'analysis') {
     if (next === 'analysis' && region !== 'C') return
     setLayer(next)
     setShowPixelRaster(true)
@@ -274,7 +276,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
     setRegion('')
     setProvince('')
     setDistrict('')
-    setLayer('classes')
+    setLayer('detected')
   }
 
   const hasActiveFilters = region !== '' || province !== '' || district !== ''
@@ -282,8 +284,8 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
   function stepBack(): boolean {
     if (district) { setDistrict(''); return true }
     if (province) { setProvince(''); return true }
-    if (region) { setRegion(''); setLayer('classes'); return true }
-    if (layer !== 'classes') { setLayer('classes'); return true }
+    if (region) { setRegion(''); setLayer('detected'); return true }
+    if (layer !== 'detected') { setLayer('detected'); return true }
     return false
   }
 
@@ -328,7 +330,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
           value={region}
           onChange={(e) => {
             setRegion(e.target.value)
-            if (e.target.value !== 'C') setLayer('classes')
+            if (e.target.value !== 'C' && layer === 'analysis') setLayer('detected')
             setProvince('')
             setDistrict('')
           }}
@@ -390,9 +392,10 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
           MAP LEGEND
         </div>
         <div className="legend-list">
+          {layer === 'detected' && <div className="legend-item"><span className="legend-swatch" style={{ background: '#facc15' }} /> Detected pixels &mdash; abandoned land</div>}
           <div className="legend-item"><span className="legend-swatch" style={{ background: '#a3e635' }} /> C1 &mdash; Abandoned field crops</div>
           <div className="legend-item"><span className="legend-swatch" style={{ background: '#38bdf8' }} /> C2 &mdash; Shrub encroachment</div>
-          <div className="legend-overlay-status">Raster: {layer === 'classes' ? 'TYPE (C1 / C2)' : 'EVIDENCE (Probability x Duration)'}{!showPixelRaster && ' - hidden'}</div>
+          <div className="legend-overlay-status">Raster: {layer === 'detected' ? 'DETECTED PIXELS' : layer === 'classes' ? 'TYPE (C1 / C2)' : 'EVIDENCE (Probability x Duration)'}{!showPixelRaster && ' - hidden'}</div>
           {region === 'C' && <div className="evidence-map-legend">
             <h3>EVIDENCE COLORS</h3><p>Probability (%) by duration (years)</p>
             <div className="evidence-legend-matrix"><span /><span>&gt;0&ndash;&lt;3</span><span>3&ndash;&lt;5</span><span>&ge;5</span>
@@ -404,7 +407,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
           {region === 'C' && <div className="legend-item"><span className="case-legend-dot" /> Case-study location</div>}
           <p className="legend-footnote">Transparent raster areas have no displayed classification.</p>
           <div className="legend-item"><span className="legend-line dashed" /> Sub-areas — click to drill in</div>
-          {layer === 'classes' && <div className="cluster-key"><span className="cluster-key-ring" /><span>Circle size = detected pixels<br />Ring color = C1 / C2 share</span></div>}
+          {layer !== 'analysis' && <div className="cluster-key"><span className="cluster-key-ring" /><span>Circle size = detected pixels<br />Ring color = C1 / C2 share</span></div>}
         </div>
 
         <p className="stat-sub" style={{ marginTop: 20 }}>Filters update map + dashboard</p>
@@ -412,17 +415,16 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
 
       <div className="explore-main">
         <div className="explore-map">
-<div className="map-display-tabs" aria-label="Raster overlay">
-            <button className={layer === 'classes' ? 'active' : ''} aria-pressed={layer === 'classes'} onClick={() => toggleLayer('classes')}>TYPE</button>
-            <button
-              className={layer === 'analysis' ? 'active' : ''}
-              aria-pressed={layer === 'analysis'}
-              disabled={region !== 'C'}
-              title={region !== 'C' ? 'Probability x Duration raster available for Central only' : ''}
-              onClick={() => toggleLayer('analysis')}
-            >
-              EVIDENCE
-            </button>
+          <div className="map-layer-select">
+            <label htmlFor="map-pixel-layer">Layer</label>
+            <select id="map-pixel-layer" value={layer} onChange={e => {
+              const next = e.target.value
+              if (next === 'detected' || next === 'classes' || next === 'analysis') toggleLayer(next)
+            }}>
+              <option value="detected">Detected pixels</option>
+              <option value="classes">Type</option>
+              <option value="analysis" disabled={region !== 'C'}>Evidence{region !== 'C' ? ' (Central only)' : ''}</option>
+            </select>
           </div>
           <button className="map-home" aria-label="Reset map to Thailand" onClick={clearFilters}><LineIcon name="pin" /></button>
           <ExploreMap
@@ -436,7 +438,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
             showPixelRaster={showPixelRaster}
             showClusters={showClusters}
             showAnalysis={layer === 'analysis'}
-            showAbandoned={false}
+            showAbandoned={layer === 'detected'}
             hoveredProvince={hoveredProvince}
             hoveredDistrict={hoveredDistrict}
             onSelectRegion={selectRegion}
@@ -465,7 +467,13 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
                   <div className="panel-title" style={{ marginTop: 16 }}>Type composition</div>
                   <TypeDoughnut pxType1={agg.pxType1} pxType2={agg.pxType2} pct1={agg.pct1} pct2={agg.pct2} />
                 </div>
-                {!province && (
+                {!region && (
+                  <div className="dash-col">
+                    <div className="panel-title" style={{ marginTop: 16 }}>Top regions (nominal rai)</div>
+                    <RankedBar data={topReg} hovered={hoveredRegion} onHover={setHoveredRegion} onSelect={selectRegion} />
+                  </div>
+                )}
+                {region && !province && (
                   <div className="dash-col">
                     <div className="panel-title" style={{ marginTop: 16 }}>Top 5 provinces (nominal rai)</div>
                     <RankedBar data={top5} hovered={hoveredProvince} onHover={setHoveredProvince} onSelect={selectProvince} />
@@ -478,6 +486,13 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
                   </div>
                 )}
               </div>
+
+              {!region && (
+                <div className="dash-col dash-col-full">
+                  <div className="panel-title" style={{ marginTop: 16 }}>Top 5 provinces (nominal rai)</div>
+                  <RankedBar data={top5} hovered={hoveredProvince} onHover={setHoveredProvince} onSelect={selectProvince} />
+                </div>
+              )}
 
               {region === 'C' && (<>
                   <section className="analysis-matrix"><div className="panel-title">Probability &times; Duration <small>Stronger abandonment evidence &#8599;</small></div>
