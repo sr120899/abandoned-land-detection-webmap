@@ -17,6 +17,7 @@ import type { AmphoeFeature } from '../../hooks/useBoundaryData'
 import ExploreMap from './ExploreMap'
 import EvidenceSheet from './EvidenceSheet'
 import { BIV_COLORS, bivClassId } from '../../utils/bivariateColors'
+import { useLanguage } from '../../i18n/LanguageContext'
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend)
 
@@ -134,6 +135,7 @@ function defaultDashboardWidth(): number {
 }
 
 const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props, ref) {
+  const { t } = useLanguage()
   const { features } = useBoundaryData()
   const [region, setRegion] = useState<string>('')
   const [province, setProvince] = useState<string>('')
@@ -305,26 +307,26 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
   }
 
   const dashboardTitle = district
-    ? districtOptions.find(([code]) => code === district)?.[1] ?? 'Selected district'
+    ? districtOptions.find(([code]) => code === district)?.[1] ?? t('explore.extentStep.district')
     : province
-      ? provinceOptions.find(([code]) => code === province)?.[1] ?? 'Selected province'
+      ? provinceOptions.find(([code]) => code === province)?.[1] ?? t('explore.extentStep.province')
       : region
         ? REGION_NAMES[region] ?? region
-        : 'Thailand'
+        : t('explore.thailand')
 
   return (
     <div className="explore-layout">
       <aside className="explore-sidebar">
-        <h1 className="explore-sr-only">Explore abandoned land</h1>
+        <h1 className="explore-sr-only">{t('explore.srTitle')}</h1>
         <div className="breadcrumb-mini">
-          Thailand
+          {t('explore.thailand')}
           {region && <> &gt; {REGION_NAMES[region] ?? region}</>}
           {province && <> &gt; {provinceOptions.find(([code]) => code === province)?.[1] ?? province}</>}
           {district && <> &gt; {districtOptions.find(([code]) => code === district)?.[1] ?? district}</>}
         </div>
 
-        <div className="sidebar-section-label">FILTERS</div>
-        <label className="sidebar-label" htmlFor="filter-region">Region</label>
+        <div className="sidebar-section-label">{t('explore.filters')}</div>
+        <label className="sidebar-label" htmlFor="filter-region">{t('explore.region')}</label>
         <select
           id="filter-region"
           value={region}
@@ -335,7 +337,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
             setDistrict('')
           }}
         >
-          <option value="">All regions</option>
+          <option value="">{t('explore.allRegions')}</option>
           {Object.entries(REGION_NAMES).map(([code, name]) => (
             <option key={code} value={code}>
               {name}
@@ -343,7 +345,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
           ))}
         </select>
 
-        <label className="sidebar-label" htmlFor="filter-province">Province</label>
+        <label className="sidebar-label" htmlFor="filter-province">{t('explore.province')}</label>
         <select
           id="filter-province"
           value={province}
@@ -353,7 +355,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
             setDistrict('')
           }}
         >
-          <option value="">All</option>
+          <option value="">{t('explore.all')}</option>
           {provinceOptions.map(([code, name]) => (
             <option key={code} value={code}>
               {name}
@@ -361,9 +363,9 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
           ))}
         </select>
 
-        <label className="sidebar-label" htmlFor="filter-district">District</label>
+        <label className="sidebar-label" htmlFor="filter-district">{t('explore.district')}</label>
         <select id="filter-district" value={district} disabled={!province} onChange={(e) => setDistrict(e.target.value)}>
-          <option value="">All</option>
+          <option value="">{t('explore.all')}</option>
           {districtOptions.map(([code, name]) => (
             <option key={code} value={code}>
               {name}
@@ -372,61 +374,61 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
         </select>
 
         <button className="clear-filters-btn" disabled={!hasActiveFilters} onClick={clearFilters}>
-          ✕ Clear filters
+          {t('explore.clearFilters')}
         </button>
 
         <div className="sidebar-section-label" style={{ marginTop: 20 }}>
-          LAYERS
+          {t('explore.layers')}
         </div>
         <label className="layer-checkbox">
           <input type="checkbox" checked={showPixelRaster} onChange={(e) => setShowPixelRaster(e.target.checked)} />
-          Raster overlay
+          {t('explore.rasterOverlay')}
         </label>
         <label className="layer-checkbox">
           <input type="checkbox" checked={showBoundaryLines} onChange={(e) => setShowBoundaryLines(e.target.checked)} />
-          Boundary lines
+          {t('explore.boundaryLines')}
         </label>
-        <label className="layer-checkbox" title={layer === 'analysis' ? 'Clusters are hidden in Evidence view' : ''}><input type="checkbox" checked={showClusters} disabled={layer === 'analysis'} onChange={e => setShowClusters(e.target.checked)} />Cluster composition</label>
+        <label className="layer-checkbox" title={layer === 'analysis' ? t('explore.clustersHiddenInEvidence') : ''}><input type="checkbox" checked={showClusters} disabled={layer === 'analysis'} onChange={e => setShowClusters(e.target.checked)} />{t('explore.clusterComposition')}</label>
 
         <div className="sidebar-section-label" style={{ marginTop: 20 }}>
-          MAP LEGEND
+          {t('explore.mapLegend')}
         </div>
         <div className="legend-list">
-          {layer === 'detected' && <div className="legend-item"><span className="legend-swatch" style={{ background: '#facc15' }} /> Detected pixels &mdash; abandoned land</div>}
-          <div className="legend-item"><span className="legend-swatch" style={{ background: '#a3e635' }} /> C1 &mdash; Abandoned field crops</div>
-          <div className="legend-item"><span className="legend-swatch" style={{ background: '#38bdf8' }} /> C2 &mdash; Shrub encroachment</div>
-          <div className="legend-overlay-status">Raster: {layer === 'detected' ? 'DETECTED PIXELS' : layer === 'classes' ? 'TYPE (C1 / C2)' : 'EVIDENCE (Probability x Duration)'}{!showPixelRaster && ' - hidden'}</div>
+          {layer === 'detected' && <div className="legend-item"><span className="legend-swatch" style={{ background: '#facc15' }} /> {t('explore.legend.detected')}</div>}
+          <div className="legend-item"><span className="legend-swatch" style={{ background: '#a3e635' }} /> {t('explore.legend.c1')}</div>
+          <div className="legend-item"><span className="legend-swatch" style={{ background: '#38bdf8' }} /> {t('explore.legend.c2')}</div>
+          <div className="legend-overlay-status">{t('explore.legend.rasterPrefix')} {layer === 'detected' ? t('explore.raster.detected') : layer === 'classes' ? t('explore.raster.type') : t('explore.raster.evidence')}{!showPixelRaster && t('explore.legend.hidden')}</div>
           {region === 'C' && <div className="evidence-map-legend">
-            <h3>EVIDENCE COLORS</h3><p>Probability (%) by duration (years)</p>
+            <h3>{t('explore.evidenceColors')}</h3><p>{t('explore.probabilityByDuration')}</p>
             <div className="evidence-legend-matrix"><span /><span>&gt;0&ndash;&lt;3</span><span>3&ndash;&lt;5</span><span>&ge;5</span>
               {['\u226575%', '50\u2013<75%', '<50%'].map((label, row) => <Fragment key={label}><span>{label}</span>{[0, 1, 2].map(col => <i key={col} style={{ background: BIV_COLORS[bivClassId(row, col)] }} role="img" aria-label={label + ' probability; ' + ['over 0 to under 3', '3 to under 5', '5 or more'][col] + ' years'} />)}</Fragment>)}
-            </div><p>Yellow: probability &ge;75%, duration &ge;5 years.</p>
+            </div><p>{t('explore.legend.yellowNote')}</p>
           </div>}
-          <div className="legend-item"><span className="legend-line solid" /> Selected boundary</div>
-          <div className="legend-item"><span className="legend-line hovered" /> Hovered area</div>
-          {region === 'C' && <div className="legend-item"><span className="case-legend-dot" /> Case-study location</div>}
-          <p className="legend-footnote">Transparent raster areas have no displayed classification.</p>
-          <div className="legend-item"><span className="legend-line dashed" /> Sub-areas — click to drill in</div>
-          {layer !== 'analysis' && <div className="cluster-key"><span className="cluster-key-ring" /><span>Circle size = detected pixels<br />Ring color = C1 / C2 share</span></div>}
+          <div className="legend-item"><span className="legend-line solid" /> {t('explore.legend.selectedBoundary')}</div>
+          <div className="legend-item"><span className="legend-line hovered" /> {t('explore.legend.hoveredArea')}</div>
+          {region === 'C' && <div className="legend-item"><span className="case-legend-dot" /> {t('explore.legend.caseStudyLocation')}</div>}
+          <p className="legend-footnote">{t('explore.legend.transparentNote')}</p>
+          <div className="legend-item"><span className="legend-line dashed" /> {t('explore.legend.subAreas')}</div>
+          {layer !== 'analysis' && <div className="cluster-key"><span className="cluster-key-ring" /><span>{t('explore.clusterKey.text')}<br />{t('explore.clusterKey.ring')}</span></div>}
         </div>
 
-        <p className="stat-sub" style={{ marginTop: 20 }}>Filters update map + dashboard</p>
+        <p className="stat-sub" style={{ marginTop: 20 }}>{t('explore.filtersUpdateNote')}</p>
       </aside>
 
       <div className="explore-main">
         <div className="explore-map">
           <div className="map-layer-select">
-            <label htmlFor="map-pixel-layer">Layer</label>
+            <label htmlFor="map-pixel-layer">{t('explore.mapLayer')}</label>
             <select id="map-pixel-layer" value={layer} onChange={e => {
               const next = e.target.value
               if (next === 'detected' || next === 'classes' || next === 'analysis') toggleLayer(next)
             }}>
-              <option value="detected">Detected pixels</option>
-              <option value="classes">Type</option>
-              <option value="analysis" disabled={region !== 'C'}>Evidence{region !== 'C' ? ' (Central only)' : ''}</option>
+              <option value="detected">{t('explore.mapLayer.detected')}</option>
+              <option value="classes">{t('explore.mapLayer.type')}</option>
+              <option value="analysis" disabled={region !== 'C'}>{t('explore.mapLayer.evidence')}{region !== 'C' ? t('explore.mapLayer.centralOnly') : ''}</option>
             </select>
           </div>
-          <button className="map-home" aria-label="Reset map to Thailand" onClick={clearFilters}><LineIcon name="pin" /></button>
+          <button className="map-home" aria-label={t('explore.resetMap')} onClick={clearFilters}><LineIcon name="pin" /></button>
           <ExploreMap
             nationalFeatures={features}
             boundaryFeatures={filtered}
@@ -456,32 +458,32 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
         <aside className="explore-dashboard" style={{ '--dash-w': `${dashboardWidth}px` } as CSSProperties}>
 
           <div className="total-card">
-                <div className="extent-label">SELECTED EXTENT</div><div className="extent-title">{dashboardTitle}</div>
-                <div className="extent-steps" aria-label="Exploration depth">{['Thailand', 'Region', 'Province', 'District'].map((label, index) => <span key={label} className={index === (district ? 3 : province ? 2 : region ? 1 : 0) ? 'active' : ''}><b>{index + 1}</b><small>{label}</small></span>)}</div>
-                <div className="stat-sub">{district || province || region ? 'C1 + C2 · nominal 30m estimate' : 'Model output / Thailand'}</div>
+                <div className="extent-label">{t('explore.selectedExtent')}</div><div className="extent-title">{dashboardTitle}</div>
+                <div className="extent-steps" aria-label="Exploration depth">{[t('explore.extentStep.thailand'), t('explore.extentStep.region'), t('explore.extentStep.province'), t('explore.extentStep.district')].map((label, index) => <span key={label} className={index === (district ? 3 : province ? 2 : region ? 1 : 0) ? 'active' : ''}><b>{index + 1}</b><small>{label}</small></span>)}</div>
+                <div className="stat-sub">{district || province || region ? t('explore.nominalEstimate') : t('explore.modelOutputThailand')}</div>
                 <div className="big-number">{agg.pxTotal.toLocaleString()} px <small>(&asymp; {agg.areaAban.toLocaleString(undefined, { maximumFractionDigits: 2 })} rai)</small></div>
               </div>
 
               <div className={`type-top-row ${district ? 'district-summary' : ''}`}>
                 <div className="dash-col">
-                  <div className="panel-title" style={{ marginTop: 16 }}>Type composition</div>
+                  <div className="panel-title" style={{ marginTop: 16 }}>{t('explore.typeComposition')}</div>
                   <TypeDoughnut pxType1={agg.pxType1} pxType2={agg.pxType2} pct1={agg.pct1} pct2={agg.pct2} />
                 </div>
                 {!region && (
                   <div className="dash-col">
-                    <div className="panel-title" style={{ marginTop: 16 }}>Top regions (nominal rai)</div>
+                    <div className="panel-title" style={{ marginTop: 16 }}>{t('explore.topRegions')}</div>
                     <RankedBar data={topReg} hovered={hoveredRegion} onHover={setHoveredRegion} onSelect={selectRegion} />
                   </div>
                 )}
                 {region && !province && (
                   <div className="dash-col">
-                    <div className="panel-title" style={{ marginTop: 16 }}>Top 5 provinces (nominal rai)</div>
+                    <div className="panel-title" style={{ marginTop: 16 }}>{t('explore.topProvinces')}</div>
                     <RankedBar data={top5} hovered={hoveredProvince} onHover={setHoveredProvince} onSelect={selectProvince} />
                   </div>
                 )}
                 {province && !district && (
                   <div className="dash-col">
-                    <div className="panel-title" style={{ marginTop: 16 }}>Top 5 districts (nominal rai)</div>
+                    <div className="panel-title" style={{ marginTop: 16 }}>{t('explore.topDistricts')}</div>
                     <RankedBar data={topAmphoe} hovered={hoveredDistrict} onHover={setHoveredDistrict} onSelect={selectDistrict} />
                   </div>
                 )}
@@ -489,13 +491,13 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
 
               {!region && (
                 <div className="dash-col dash-col-full">
-                  <div className="panel-title" style={{ marginTop: 16 }}>Top 5 provinces (nominal rai)</div>
+                  <div className="panel-title" style={{ marginTop: 16 }}>{t('explore.topProvinces')}</div>
                   <RankedBar data={top5} hovered={hoveredProvince} onHover={setHoveredProvince} onSelect={selectProvince} />
                 </div>
               )}
 
               {region === 'C' && (<>
-                  <section className="analysis-matrix"><div className="panel-title">Probability &times; Duration <small>Stronger abandonment evidence &#8599;</small></div>
+                  <section className="analysis-matrix"><div className="panel-title">{t('explore.probDuration')} <small>{t('explore.strongerEvidence')}</small></div>
                   <div className="bivariate-grid mini">
                     <div />
                     <div className="axis-label center">&gt;0&ndash;&lt;3 yr</div>
@@ -518,7 +520,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
                                 title={`${px.toLocaleString()} px (≈${rai.toLocaleString(undefined, { maximumFractionDigits: 2 })} rai)`}
                               >
                                 <span className="cell-value">{row ? px.toLocaleString() : '\u2014'}</span>
-                                <span className="cell-sub">{row ? rai.toLocaleString(undefined, { maximumFractionDigits: 0 }) + ' rai' : 'No data'}</span>
+                                <span className="cell-sub">{row ? rai.toLocaleString(undefined, { maximumFractionDigits: 0 }) + ' rai' : t('explore.noData')}</span>
                               </div>
                             )
                           })}
@@ -530,7 +532,7 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
                   </section>
                   <div className="stat-chip-row" style={{ marginTop: 14 }}>
                     <div className="stat-chip">
-                      <div className="metric-label"><LineIcon name="target" /> HIGH EVIDENCE</div>
+                      <div className="metric-label"><LineIcon name="target" /> {t('explore.highEvidence')}</div>
                       <div className="stat-chip-value good">
                         {highLongCell ? highLongCell.pixel_count.toLocaleString() : '…'} px
                       </div>
@@ -539,11 +541,11 @@ const ExploreScene = forwardRef<ExploreSceneHandle>(function ExploreScene(_props
                       </div>
                     </div>
                     <div className="stat-chip">
-                      <div className="metric-label"><LineIcon name="search" />SELECTED CASE STUDIES</div><div className="stat-chip-value">{casesInBoundary.length}</div><button className="case-open-mini" disabled={!casesInBoundary.length} onClick={openSelectedCase}>OPEN CASE STUDY &rarr;</button>
+                      <div className="metric-label"><LineIcon name="search" />{t('explore.selectedCaseStudies')}</div><div className="stat-chip-value">{casesInBoundary.length}</div><button className="case-open-mini" disabled={!casesInBoundary.length} onClick={openSelectedCase}>{t('explore.openCaseStudy')}</button>
                     </div>
                   </div>
                 </>)}
-          <p className="demo-scope-note">Note: This live demo includes Evidence (Probability &times; Duration) analysis and case-study locations for the Central region only. Other regions show Type classification and totals.</p>
+          <p className="demo-scope-note">{t('explore.demoScopeNote')}</p>
         </aside>
       </div>
 

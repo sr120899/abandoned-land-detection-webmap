@@ -8,6 +8,7 @@ import { Contours, MethodVisual } from './MethodVisuals'
 import type { VisualKind } from './MethodVisuals'
 import './MethodScene.css'
 import './MethodLayout.css'
+import { useLanguage } from '../i18n/LanguageContext'
 
 type StageCard = { visual: VisualKind; title: string; labels: string[] }
 type Script = { tab: string; file: string; tag: string; code: string; caption: string }
@@ -269,15 +270,17 @@ const resources = [
   { icon: 'database', title: 'Sample Data', copy: 'Example inputs and reference data', path: 'tree/main/DATA/DATA_CASE%20STUDY' },
 ]
 function ScriptToggle({ open, onClick, label, count }: { open: boolean; onClick: () => void; label: string; count?: number }) {
+  const { t } = useLanguage()
   return <button type="button" className="script-toggle" aria-expanded={open} onClick={onClick}>
-    <LineIcon name="code" />{open ? `Hide ${label}` : `View ${label}`}{count && count > 1 ? ` (${count})` : ''}<LineIcon name="chevron" />
+    <LineIcon name="code" />{open ? t('Hide') : t('View')} {t(label)}{count && count > 1 ? ` (${count})` : ''}<LineIcon name="chevron" />
   </button>
 }
 function ScriptBox({ scripts, activeTab, onTab, onClose }: { scripts: Script[]; activeTab: number; onTab: (i: number) => void; onClose: () => void }) {
+  const { t } = useLanguage()
   const active = scripts[activeTab] ?? scripts[0]
   return <div className="script-box">
     {scripts.length > 1 && <div className="sb-tabs">{scripts.map((s, i) => <button key={s.tab} type="button" className={i === activeTab ? 'active' : ''} onClick={() => onTab(i)}>{s.tab}</button>)}</div>}
-    <div className="sb-head"><span className="sbdots"><i /><i /><i /></span><span className="sb-file">{active.file}</span><span className="sb-tag">{active.tag}</span><button type="button" className="sb-close" aria-label="Close script" onClick={onClose}>✕</button></div>
+    <div className="sb-head"><span className="sbdots"><i /><i /><i /></span><span className="sb-file">{active.file}</span><span className="sb-tag">{active.tag}</span><button type="button" className="sb-close" aria-label={t('Close script')} onClick={onClose}>✕</button></div>
     <pre dangerouslySetInnerHTML={{ __html: active.code }} />
     <div className="sb-caption"><b>Why: </b>{active.caption}</div>
   </div>
@@ -289,6 +292,7 @@ function ComparisonChart({ previous, current, decrease = false }: { previous: nu
   </div>
 }
 export default function MethodScene() {
+  const { t } = useLanguage()
   const [stage, setStage] = useState<number | null>(null)
   const [openScript, setOpenScript] = useState<Record<number, boolean>>({})
   const [scriptTab, setScriptTab] = useState<Record<number, number>>({})
@@ -301,84 +305,84 @@ export default function MethodScene() {
     <section className="method-hero">
       <Contours />
       <div className="method-hero-copy">
-        <span>02 / METHODOLOGY</span>
-        <h1>From satellite signals<br />to <em>spatial intelligence.</em></h1>
-        <p>Connecting Earth observations, land-use history and machine learning to identify areas for review.</p>
+        <span>{t('02 / METHODOLOGY')}</span>
+        <h1>{t('From satellite signals')}<br />{t('to spatial intelligence.')}</h1>
+        <p>{t('Connecting Earth observations, land-use history and machine learning to identify areas for review.')}</p>
         <div className="source-pills"><i><LineIcon name="layers" />Landsat 7/8/9</i><i><LineIcon name="signal" />Sentinel-1/2</i><i><LineIcon name="grid" />Dynamic World</i></div>
       </div>
       <figure className="method-hero-story" aria-label="Satellite observations become change signals and classified spatial outputs">
-        <figcaption><span>THE EVIDENCE PATH</span><b>Observe the land. Reveal the change.</b></figcaption>
+        <figcaption><span>{t('THE EVIDENCE PATH')}</span><b>{t('Observe the land. Reveal the change.')}</b></figcaption>
         <div className="hero-evidence-steps">
-          <div><MethodVisual kind="sources"/><span>OBSERVATIONS</span><b>Read the landscape</b></div>
-          <div><MethodVisual kind="trend"/><span>CHANGE SIGNALS</span><b>Trace its history</b></div>
-          <div><MethodVisual kind="types"/><span>SPATIAL OUTPUTS</span><b>Locate candidates</b></div>
+          <div><MethodVisual kind="sources"/><span>{t('OBSERVATIONS')}</span><b>{t('Read the landscape')}</b></div>
+          <div><MethodVisual kind="trend"/><span>{t('CHANGE SIGNALS')}</span><b>{t('Trace its history')}</b></div>
+          <div><MethodVisual kind="types"/><span>{t('SPATIAL OUTPUTS')}</span><b>{t('Locate candidates')}</b></div>
         </div>
-        <p>Satellite time series &rarr; change detection &rarr; areas for review</p>
+        <p>{t('Satellite time series → change detection → areas for review')}</p>
       </figure>
-      <dl className="method-stats"><div><dt>OBSERVATION PERIOD</dt><dd>2000 — 2025</dd></div><div><dt>ANALYSIS GRID</dt><dd>30 <small>m</small></dd></div><div><dt>PROCESSING</dt><dd>4 <small>stages</small></dd></div></dl>
+      <dl className="method-stats"><div><dt>{t('OBSERVATION PERIOD')}</dt><dd>2000 — 2025</dd></div><div><dt>{t('ANALYSIS GRID')}</dt><dd>30 <small>m</small></dd></div><div><dt>{t('PROCESSING')}</dt><dd>4 <small>stages</small></dd></div></dl>
     </section>
 
     <EvidenceJourney />
     <section className="method-glance">
       <Contours />
-      <header><h2>METHOD AT A GLANCE</h2><p>Each processing stage is linked to the evidence and outputs it produces.</p></header>
+      <header><h2>{t('METHOD AT A GLANCE')}</h2><p>{t('Each processing stage is linked to the evidence and outputs it produces.')}</p></header>
       <div className="method-linked-layout">
         <WorkflowConnection stage={stage}/>
         <div className="method-logic-column">
-          <div className="logic-side"><h3>DETECTION LOGIC</h3><div className="logic-row logic-vertical">
-            {detectionLogic.map(item => <button type="button" key={item.title} className={stage === item.stage ? 'linked' : ''} aria-expanded={stage === item.stage} aria-controls={`method-detail-${item.stage}`} onClick={() => selectStage(item.stage)}><LineIcon name={item.icon} /><b>{item.title}</b><small>{item.copy}</small><span className="logic-stage-label">Stage 0{item.stage + 1}</span><span className="logic-arrow" aria-hidden="true"><FlowArrow/></span></button>)}
+          <div className="logic-side"><h3>{t('DETECTION LOGIC')}</h3><div className="logic-row logic-vertical">
+            {detectionLogic.map(item => <button type="button" key={item.title} className={stage === item.stage ? 'linked' : ''} aria-expanded={stage === item.stage} aria-controls={`method-detail-${item.stage}`} onClick={() => selectStage(item.stage)}><LineIcon name={item.icon} /><b>{t(item.title)}</b><small>{item.copy}</small><span className="logic-stage-label">Stage 0{item.stage + 1}</span><span className="logic-arrow" aria-hidden="true"><FlowArrow/></span></button>)}
           </div></div>
 
         </div>
         <div className="method-flow-rail" aria-hidden="true">{stages.map((item, i) => <span key={item.title} className={stage === i ? 'active' : ''}>0{i + 1}</span>)}</div>
         <div className="method-workflow-explorer">
-          <header className="visual-workflow-heading"><h3>PROCESSING WORKFLOW</h3><span>FROM SATELLITE DATA TO ACTIONABLE INSIGHTS</span></header>
+          <header className="visual-workflow-heading"><h3>{t('PROCESSING WORKFLOW')}</h3><span>{t('FROM SATELLITE DATA TO ACTIONABLE INSIGHTS')}</span></header>
           <div className="workflow-stage-tabs" aria-label="Processing stages">
             {stages.map((item, i) => <button key={item.title} type="button" id={`method-stage-${i}`} aria-expanded={stage === i} aria-controls={`method-detail-${i}`} aria-label={`${item.title} \u2014 ${item.summary}`} className={stage === i ? 'active' : ''} onClick={() => selectStage(i)}>
               <span className="stage-number">0{i + 1}</span><LineIcon name={item.icon} />
-              <b>{item.title}</b>
-              <span className="stage-active-label">{stage === i ? 'ACTIVE' : '\u203a'}</span>
+              <b>{t(item.title)}</b>
+              <span className="stage-active-label">{stage === i ? t('ACTIVE') : '\u203a'}</span>
             </button>)}
           </div>
           {stage !== null && <p className="method-connection" role="status"><b>{detectionLogic[stage].title} &rarr; {stages[stage].title}</b><span>{detectionLogic[stage].connection}</span></p>}
           {stages.map((item, i) => <div key={item.title} id={`method-detail-${i}`} role="region" aria-labelledby={`method-stage-${i}`} hidden={stage !== i} className="method-process-expanded">
             <div className="workflow-detail-panel">
               <div className="workflow-detail-main">
-                <header><span className="stage-number">0{i + 1}</span><div><h3>{item.title}</h3><p>{item.description}</p></div><ScriptToggle open={!!openScript[i]} onClick={() => toggleScript(i)} label="GEE script" count={item.scripts.length} /></header>
+                <header><span className="stage-number">0{i + 1}</span><div><h3>{t(item.title)}</h3><p>{item.description}</p></div><ScriptToggle open={!!openScript[i]} onClick={() => toggleScript(i)} label="GEE script" count={item.scripts.length} /></header>
                 <ProcessingDiagram stage={i}/>
                 <div className={`script-panel${openScript[i] ? ' open' : ''}`}><ScriptBox scripts={item.scripts} activeTab={scriptTab[i] ?? 0} onTab={t => setTab(i, t)} onClose={() => closeScript(i)} /></div>
               </div>
-              <aside className="workflow-summary"><header><LineIcon name={item.icon} /><div><h3>{['DATA', 'FEATURE', 'MODEL', 'VALIDATION'][i]} SUMMARY</h3><p>Key characteristics of this processing stage.</p></div></header>{item.facts.map(fact => <article key={fact.title}><LineIcon name={fact.icon} /><div><b>{fact.title}</b><p>{fact.copy}</p></div></article>)}</aside>
+              <aside className="workflow-summary"><header><LineIcon name={item.icon} /><div><h3>{t(['DATA', 'FEATURE', 'MODEL', 'VALIDATION'][i])} {t('SUMMARY')}</h3><p>{t('Key characteristics of this processing stage.')}</p></div></header>{item.facts.map(fact => <article key={fact.title}><LineIcon name={fact.icon} /><div><b>{fact.title}</b><p>{fact.copy}</p></div></article>)}</aside>
             </div>
             {i === 3 && (
     <section className="method-evaluation stage-evaluation" aria-labelledby="stage-evaluation-title">
-      <header className="evaluation-heading"><div><span className="evaluation-kicker">04 / VALIDATION &amp; REFINEMENT</span><h2 id="stage-evaluation-title">EVALUATION RESULTS</h2><p>National performance snapshots</p></div><span className="evaluation-badge"><LineIcon name="shield"/>Reference-based assessment</span></header>
+      <header className="evaluation-heading"><div><span className="evaluation-kicker">{t('04 / VALIDATION & REFINEMENT')}</span><h2 id="stage-evaluation-title">{t('EVALUATION RESULTS')}</h2><p>{t('National performance snapshots')}</p></div><span className="evaluation-badge"><LineIcon name="shield"/>{t('Reference-based assessment')}</span></header>
       <div className="evaluation-grid">
-        <article className="metric-card precision"><header><span className="metric-symbol"><LineIcon name="target"/></span><div><h3>Precision</h3><p>Higher is better</p></div></header><div className="metric-value"><b>83.3<span>%</span></b><span className="metric-delta">+12.4 pp<small>vs. historical reference</small></span></div><ComparisonChart previous={70.9} current={83.3}/></article>
-        <article className="metric-card misclassification"><header><span className="metric-symbol"><LineIcon name="shield"/></span><div><h3>Non-abandoned misclassification</h3><p>Lower is better</p></div></header><div className="metric-value"><b>8.7<span>%</span></b><span className="metric-delta">&minus;62.3 pp<small>vs. historical reference</small></span></div><ComparisonChart previous={71} current={8.7} decrease/></article>
+        <article className="metric-card precision"><header><span className="metric-symbol"><LineIcon name="target"/></span><div><h3>{t('Precision')}</h3><p>{t('Higher is better')}</p></div></header><div className="metric-value"><b>83.3<span>%</span></b><span className="metric-delta">+12.4 pp<small>{t('vs. historical reference')}</small></span></div><ComparisonChart previous={70.9} current={83.3}/></article>
+        <article className="metric-card misclassification"><header><span className="metric-symbol"><LineIcon name="shield"/></span><div><h3>{t('Non-abandoned misclassification')}</h3><p>{t('Lower is better')}</p></div></header><div className="metric-value"><b>8.7<span>%</span></b><span className="metric-delta">&minus;62.3 pp<small>{t('vs. historical reference')}</small></span></div><ComparisonChart previous={71} current={8.7} decrease/></article>
       </div>
-      <aside className="evaluation-context"><LineIcon name="bulb"/><div><b>How to read these results</b><p>Different evaluation sets and sample sizes were used. These are performance snapshots, not a matched-sample comparison.</p><small>Source: Project Summary / Before&ndash;After Evidence &middot; Reference: 920 (AC1 600 + AC0 320)</small></div></aside>
+      <aside className="evaluation-context"><LineIcon name="bulb"/><div><b>{t('How to read these results')}</b><p>{t('Different evaluation sets and sample sizes were used. These are performance snapshots, not a matched-sample comparison.')}</p><small>Source: Project Summary / Before&ndash;After Evidence &middot; Reference: 920 (AC1 600 + AC0 320)</small></div></aside>
     </section>
             )}
-            {i !== 3 && <footer className="workflow-insight"><div><LineIcon name="bulb" /><p>{item.note}</p></div><small>Select a stage to explore its data and processing details.<span>Process illustrations are schematic.</span></small></footer>}
+            {i !== 3 && <footer className="workflow-insight"><div><LineIcon name="bulb" /><p>{item.note}</p></div><small>{t('Select a stage to explore its data and processing details.')}<span>{t('Process illustrations are schematic.')}</span></small></footer>}
           </div>)}
-          {stage === null && <div className="method-process-prompt"><LineIcon name="layers" /><p>Select a detection-logic step or processing stage to explore the connected evidence.</p></div>}
+          {stage === null && <div className="method-process-prompt"><LineIcon name="layers" /><p>{t('Select a detection-logic step or processing stage to explore the connected evidence.')}</p></div>}
         </div>
       </div>
     </section>
 
     <section className={`method-output-section ${stage === 2 || stage === 3 ? 'linked-section' : ''}`}>
-      <Contours /><header><div><h2>MODEL OUTPUTS</h2><small>Produced by Detection & Classification (Stage 03)</small></div><ScriptToggle open={outputsScriptOpen} onClick={() => setOutputsScriptOpen(o => !o)} label="export script" /></header>
+      <Contours /><header><div><h2>{t('MODEL OUTPUTS')}</h2><small>{t('Produced by Detection & Classification (Stage 03)')}</small></div><ScriptToggle open={outputsScriptOpen} onClick={() => setOutputsScriptOpen(o => !o)} label="export script" /></header>
       <div className={`script-panel${outputsScriptOpen ? ' open' : ''}`}><ScriptBox scripts={[exportScript]} activeTab={0} onTab={() => {}} onClose={() => setOutputsScriptOpen(false)} /></div>
-      <div className="outputs-with-map"><div><div className="method-output-grid">{outputs.map(item => <article key={item.title}><b>{item.title}</b><MethodVisual kind={item.visual} /><small>{item.copy}</small></article>)}</div><div className="class-legend"><span><i className="c1" />C1 · Abandoned field crops</span><span><i className="c2" />C2 · Shrub encroachment</span></div></div></div>
+      <div className="outputs-with-map"><div><div className="method-output-grid">{outputs.map(item => <article key={item.title}><b>{t(item.title)}</b><MethodVisual kind={item.visual} /><small>{t(item.copy)}</small></article>)}</div><div className="class-legend"><span><i className="c1" />{t('C1 · Abandoned field crops')}</span><span><i className="c2" />{t('C2 · Shrub encroachment')}</span></div></div></div>
     </section>
 
 
 
     <section className="method-resources">
-      <header><h2>OPEN DATA & RESOURCES</h2><p>Reusable scripts, documentation and sample spatial outputs.</p></header>
-      <div className="resource-grid">{resources.map(item => <a key={item.title} href={`${repo}/${item.path}`} target="_blank" rel="noopener noreferrer"><LineIcon name={item.icon} /><b>{item.title}</b><small>{item.copy}</small><LineIcon name="arrow" /></a>)}</div>
-      <a className="resource-cta" href={repo} target="_blank" rel="noopener noreferrer"><LineIcon name="code" /><b>EXPLORE OPEN RESOURCES ↗</b><span>Open source for a more sustainable Thailand</span></a>
+      <header><h2>{t('OPEN DATA & RESOURCES')}</h2><p>{t('Reusable scripts, documentation and sample spatial outputs.')}</p></header>
+      <div className="resource-grid">{resources.map(item => <a key={item.title} href={`${repo}/${item.path}`} target="_blank" rel="noopener noreferrer"><LineIcon name={item.icon} /><b>{t(item.title)}</b><small>{t(item.copy)}</small><LineIcon name="arrow" /></a>)}</div>
+      <a className="resource-cta" href={repo} target="_blank" rel="noopener noreferrer"><LineIcon name="code" /><b>{t('EXPLORE OPEN RESOURCES ↗')}</b><span>{t('Open source for a more sustainable Thailand')}</span></a>
     </section>
   </div>
 }

@@ -47,6 +47,30 @@
 .top-tab-icon {
   display: inline-block;
 }
+.lang-toggle {
+  display: flex;
+  flex-shrink: 0;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+}
+.lang-toggle button {
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  padding: 6px 11px;
+  cursor: pointer;
+}
+.lang-toggle button.active {
+  background: var(--accent-2);
+  color: #00222c;
+}
 .footer-note {
   font-size: 10.5px;
   color: var(--text-dim);

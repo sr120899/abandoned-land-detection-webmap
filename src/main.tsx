@@ -4,6 +4,7 @@ import { setWorkerUrl } from 'maplibre-gl'
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import './index.css'
 import App from './App.tsx'
+import { LanguageProvider } from './i18n/LanguageContext'
 
 // maplibre-gl's worker is loaded via a runtime-constructed URL that Vite's
 // production bundler can't statically resolve (works in dev only because
@@ -15,6 +16,8 @@ setWorkerUrl(maplibreWorkerUrl)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <LanguageProvider>
+      <App />
+    </LanguageProvider>
   </StrictMode>,
 )
