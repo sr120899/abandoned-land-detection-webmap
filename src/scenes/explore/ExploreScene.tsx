@@ -73,7 +73,8 @@ function RankedBar({ data, hovered, onHover, onSelect }: RankedBarProps) {
     datasets: [
       {
         data: data.map((d) => d.area),
-        backgroundColor: data.map((d) => (d.code === hovered ? '#5eead4' : '#2dd4bf')),
+        backgroundColor: data.map((d) => (d.code === hovered ? '#fde68a' : '#facc15')),
+        hoverBackgroundColor: '#fde68a',
         borderRadius: 4,
         barThickness: 14,
       },
